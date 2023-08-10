@@ -74,6 +74,10 @@ fdatasync函数类似于fsync，但它只影响文件的数据部分。而除数
 
 * `mount -o remount,rw,exec /`  给根目录添加读写、可执行权限
 
+* ps
+
+  `ps -T -p $pid` 查看所有线程
+
 * `hexdump`：以x进制方式查看文件
 
 * `c++filt _ZN1N1C4FuncEi`  查看符号表中的函数名， 配合`typeid(xxx).name()`可以查看一个变量的类型
@@ -201,6 +205,8 @@ fdatasync函数类似于fsync，但它只影响文件的数据部分。而除数
   * `-a`：含文件
   * `-c`：列出明细的同时，增加汇总值
   * `--max-depth=x`：指定子目录深度为x
+  
+  `dd if=/dev/zero of=test.txt count=10 bs=1M`  创建大小为10M的文件
   
 * **-exec / -ok / xargs**
 
