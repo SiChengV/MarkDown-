@@ -1,4 +1,191 @@
+[TOC]
+
+
+
 ## Linux知识
+
+### VIM
+
+三种模式：
+
+* 正常模式
+
+  默认模式，打开文档进入此模式，删除、上下左右移动光标等等，可以使用快捷键
+
+  快捷键：
+
+  ```
+  h、j、k、l：右、下、左、上。H：屏幕第一个字符，L：屏幕最后一行的第一个字符
+  w、b、e：跳到下个单词词首、跳到本单词或上个单词词首、跳到本单词或下个单词词尾
+  gg：跳到第一行，G：跳到最后一行，5G：跳到第五行
+  v：进入行可视模式，类似于鼠标选取
+  ctrl + v：进入列选择模式
+  批量添加注释：进入列选择并选中列之后，I 加 // 加 esc
+  自动对齐代码：v选择范围 加 = 即可
+  对全文对齐：gg到文件开头 加 = 加 G
+  viw：选中当前单词
+  vi(tag)：如vi{：选中{}中间的内容
+  #,*：向前、向后查找光标所在关键字
+  %：匹配对应的括号
+  拷贝当前行：yy，拷贝当前行向下的5行：5yy，粘贴：p
+  删除当前行：dd，删除当前行向下的5行：5dd
+  x：删除光标所在字符
+  r：替换光标所在字符
+  R：连续替换光标所在字符
+  删除类操作符d：
+  dw：删除内容直到后一个单词的起始处（d为操作符，w为动作）
+  d$：删除内容直到行末
+  dtf：向后删除到f
+  dff：向前删除到f
+  更改类操作符c：
+  cw：删除内容直到后一个单词的起始处并进入插入模式
+  cl：删除光标字符并进入插入模式
+  在文件中查找某个词：/xxx , 跳到下一个匹配目标：n,上一个：N
+  :set hls ：高亮显示所有查找内容。:nohlsearch ：移除高亮显示
+  :s/old/new/g 可以替换 old 为 new（g：此行中的全部匹配项）（不加/g：此行中第一个匹配项）
+  :#,#s/old/new/g ：在两行内替换所有的字符串 old 为新的字符串 new
+  :! ：后接外部命令可以执行外部命令
+  设置文件行号：:set nu， 取消行号：:set nonu
+  ctrl + g：查看当前行及文件信息
+  :sp 上下分屏
+  :vsp 左右分屏
+  ctrl + w ctrl + w：在窗口之间切换
+  :tabnew filname 多标签
+  gt：切换到下一个标签
+  gT：切换到上一个标签
+  ctrl + d：查看可选的命令补全
+  到达最后一行：G，到达首行：gg
+  到达某一行：行号+G
+  0：移动到行首
+  撤销动作：u
+  U：撤销在这一行所做的所有动作
+  反撤销：ctrl + R
+  移动到20行：
+  	1.显示行号：:set nu
+  	2.输入： 20
+  	3.输入： G
+  :w TEST：该命令会以 TEST 为文件名保存整个文件
+  :r FILENAME ：将FILENAME内的内容插入光标所在行
+  :r !ls ：将ls命令的结果插入到光标所在行
+  寄存器：
+  "" 存储dcy等操作的数据
+  "0 存储y过来的数据
+  
+  :%!xxd 查看二进制文件
+  
+  ```
+
+  
+
+* **插入/编辑模式**
+
+  输入i：会跳到光标的前面，I：跳到行首
+
+  输入a：会跳到光标的后面，A：跳到行尾
+
+  输入o：另起下一行，O：另起上一行
+
+  输入r：输入一个字符取代当前字符
+
+* **命令行模式**
+
+  保存、退出、读取等等
+
+  ```
+  :wq  保存并退出
+  :q  退出
+  :q! 不保存强制退出
+  ```
+
+* 三种模式的转换：
+
+  * 命令行/插入模式--->正常模式模式  `esc`
+  * 正常模式--->插入模式  `i`
+  * 正常模式--->命令行模式 `:`或者 `/`
+
+* vimdiff
+
+  vimdiff a.txt b.txt对比两个文件的不同 
+
+**批量替换**
+
+```shell
+:let i=0|g/\(asd\)[0-9]/s//\=submatch(1).i/|let i=i+1   #将文中出现的所有asd数字替换为asd数字（数字从0开始，每次递增1）
+```
+
+参考文献： http://blog.itpub.net/25897606/viewspace-746838/  
+
+### GDB
+
+常规
+
+* 需要提前使用gcc的-g参数得到编译后的可执行文件，此文件包含调试信息（优化等级调为0）
+
+* `gdb 待调试文件`：进入调试
+
+* `set args xxx xxx`：设置命令行参数
+
+* `list/l`：列出带行号的源代码
+
+  `list show`：列出show函数源代码
+
+  `list main.c:10`：列出main.c的第十行源代码
+
+* `run/r`：运行程序，停在断点位置
+
+* `start`：直接开始调试，相当于在main的第一行设置了断点
+
+* `n/next`：下一条指令，会越过函数
+
+* `s/step`：下一条指令，会进入函数
+
+* `q`：退出gdb
+
+断点
+
+普通断点 break、观察断点watch和捕捉断点
+
+* `b 行号`：在行号处设置断点， 后可以添加条件使得满足条件才停下（条件断点）
+* `b 行号 if xxx`：设置条件断点 
+* `disable`：使断点暂时失效
+* `enable`：让断点重新生效
+* `d 行号`：删除断点 
+* `info b`：查看断点信息表
+* `continue/c`：执行到下一个断点，无断点则执行完整个程序
+* `finish`：结束当前函数调用，跳到函数调用入口
+
+查看变量
+
+* `p/print 变量`：查看变量的值
+
+* `display 变量`：设置跟踪变量
+
+* `undisplay 编号`：取消跟踪变量
+
+* `ptype`：查看变量类型
+
+* `x`：查看内存
+
+  `x /12tb arr`：表示以arr为首地址，查看12个字节，以二进制显示
+
+  * t 按二进制格式显示变量。
+  * b 表示单字节
+
+* `bt/backtrace`和`frame`
+
+  当在一个函数中想查看不在当前函数作用域的变量时，可切换到变量所在栈帧来查看
+
+  * `bt`：显示当前程序的栈帧
+  * `frame 栈帧编号`：切换当前的栈环境为指定编号栈帧
+
+多进程/多文件
+
+* `b 函数名/ b 文件名:行号`：对指定的函数或源文件打断点
+* `set follow-fork-mode parent/child`：只调试父/子进程
+
+杂项
+
+* shell：跳到shell执行shell命令，再键入exit退回到gdb
 
 ### apt包管理
 
@@ -29,23 +216,161 @@
 
 AF_UNIX：代表本地连接
 
-### Linux系统调用
+### Linux系统编程
 
 ##### 磁盘刷新、同步（sync、fsync、fdatasync）
 
 * sync
 
-sync函数只是将所有修改过的块缓冲区排入写队列，然后就返回，它并不等待实际写磁盘操作结束。通常称为update的系统守护进程会周期性地（一般每隔30秒）调用sync函数。这就保证了定期冲洗内核的块缓冲区。命令sync(1)也调用sync函数。
+  sync函数只是将所有修改过的块缓冲区排入写队列，然后就返回，它并不等待实际写磁盘操作结束。通常称为update的系统守护进程会周期性地（一般每隔30秒）调用sync函数。这就保证了定期冲洗内核的块缓冲区。命令sync(1)也调用sync函数。
 
 * fsync
 
-fsync函数只对由文件描述符filedes指定的单一文件起作用，并且**阻塞等待写磁盘操作结束，然后返回**。
+  fsync函数只对由文件描述符filedes指定的单一文件起作用，并且**阻塞等待写磁盘操作结束，然后返回**。
 
 * fdatasync
 
-fdatasync函数类似于fsync，但它只影响文件的数据部分。而除数据外，fsync还会同步更新文件的属性。
+  fdatasync函数类似于fsync，但它只影响文件的数据部分。而除数据外，fsync还会同步更新文件的属性。
 
-fdatasync函数类似于fsync，但它只影响文件的数据部分。而除数据外，fsync还会同步更新文件的属性。
+  fdatasync函数类似于fsync，但它只影响文件的数据部分。而除数据外，fsync还会同步更新文件的属性。
+
+##### epoll
+
+新的I/O多路复用机制，使用回调机制代替SELECT的轮询机制，epoll的数据结构在内核态，是一个文件对象（包含了一个监听集合和就绪队列，其中监听集合用红黑树实现，目的是为了更好更快的管理文件描述符）
+
+将就绪队列拷到用户态后再遍历就绪队列
+
+**SELECT的不足：**
+
+1. 用户态拷贝到内核态（大量对监听集合对拷贝）
+2. 文件集合大小固定（用位图来保存）
+3. 就绪机制不合理（特别是有海量连接但是少量就绪时）
+
+**epoll的不同：**
+
+1. 把监听和就绪分离
+2. 把监听集合放内核态，不用在循环中重复设置监听集合
+3. 就绪的只在就绪队列
+
+* **epoll_create函数**
+
+  创建一个epoll文件对象参数填大于0到数即可
+
+  注意结束要close
+
+* **epoll_ctl函数**
+
+  设置监听
+
+  struct epoll_event对应一个事件
+
+  *epoll_ctl和struct epoll_event结构体：*
+
+  events代表读或写事件
+
+  ![截屏2022-03-14 下午2.19.52](./Linux.assets/截屏2022-03-14 下午2.19.52.png)
+
+* **epoll_wait函数**
+
+  ```c
+  // epfd：   events：就绪队列数组，提前定义好  maxevents：最大就绪个数。 timeout超时时间，单位是ms,-1是永久等待
+  int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);
+  // 返回就绪事件个数
+  ```
+
+* **epoll的边缘触发**
+
+  有颜色则代表可以触发，epoll_wait在events参数中设置EPOLLET表示监听为边缘触发
+
+  水平触发和边缘触发
+
+  ![截屏2022-03-14 下午7.31.55](./Linux.assets/截屏2022-03-14 下午7.31.55.png)
+
+* **epoll的一个例子**
+
+  ```c++
+  #include <sys/epoll.h>
+  // 1.先用epoll_create创建一个epoll
+  		int epfd = epoll_create(1);
+  // 2.用epoll_ctl添加监视，需要提前写好struct epoll_event结构体
+      struct epoll_event event;
+      event.data.fd = sockFd;
+      event.events = EPOLLIN;
+      epoll_ctl(epfd, EPOLL_CTL_ADD, sockFd, &event);  // 监视sockFd
+  // 3.使用epoll_wait阻塞进程，需提前创建一个readyQueue数组，用来存放就绪队列
+      // 创建就绪队列
+      struct epoll_event readyQueue[MAXNUM];    // MAXNUM为就绪队列最大长度
+  		// 阻塞并开始监听
+  		int readyNum = epoll_wait(epfd, readyQueue, MAXNUM, 5000);
+  // 4.用for循环遍历就绪队列readyQueue，并设置对应的行为
+          for(int i = 0; i < readyNum; ++i){
+            if(readyQueue[i].data.fd == ...){
+  						.....
+          	}else if(){
+  						.....
+           	}
+          }
+  ```
+
+
+##### inotify
+
+事件触发的磁盘监控
+
+主要涉及三个函数：
+
+* Iinotify_init函数
+
+  ```c++
+  int inotify_init(void);   // 初始化inotify文件
+  int inotify_init1(int flags);    // 带参数的初始化，如IN_NONBLOCK 非阻塞
+  ```
+
+* inotify_add_watch函数
+
+  ```c++
+  int inotify_add_watch(int fd, const char *pathname, uint32_t mask);  // 添加需要监控的文件、目录  fd为inotify_init得到的fd
+  ```
+
+* inotify_rm_watch函数
+
+  移除监控
+
+<font size=4>示例</font>
+
+```c++
+/* 初始化inotify */
+    int notifyFd = inotify_init1(IN_NONBLOCK);
+    unordered_map<int, string> wdFilePathMap;   // 保存wd监控描述符和监控的文件路径的对应关系
+    if (notifyFd == -1) {
+        P_LOG.error("inotify_init1 failed!");
+    }
+    int wd = inotify_add_watch(notifyFd, "/root/workSpace/testCode/build", IN_CREATE | IN_DELETE);   // 监控创建和删除文件操作
+    wdFilePathMap[wd] = "/root/workSpace/testCode/build";
+    
+
+/* 处理监控的文件操作 */
+    char buf[4096];   // 保存notifyFd内保存的具体操作信息
+    int len = 0;
+    const struct inotify_event *event;    // 保存具体的一个事件内容
+    while (len = read(notifyFd, buf, sizeof(buf))) {   // 读取notifyFd中保存的事件信息到buf
+        if (len < 0) {
+            break;
+        }
+      	// 将buf中的内容转换为inotify_event类型并进行处理
+        for (char *ptr = buf; ptr < buf + len; ptr += sizeof(struct inotify_event) + event->len) { 
+            event = (const struct inotify_event *) ptr;
+            if (event->mask & IN_CREATE) {
+                P_LOG.info("IN_CREATE: %s/%s", wdFilePathMap[event->wd].data(), event->name);
+            }
+            if (event->mask & IN_DELETE) {
+                P_LOG.info("IN_DELETE: %s/%s", wdFilePathMap[event->wd].data(), event->name);
+            }
+        }
+    }
+```
+
+
 
 ### Linux常用命令
 
@@ -142,16 +467,6 @@ fdatasync函数类似于fsync，但它只影响文件的数据部分。而除数
       #   1	一般性未知错误
       #   2	不适合的shell指令
   ```
-
-* VIM使用
-
-  **批量替换**
-
-  ```shell
-  :let i=0|g/\(asd\)[0-9]/s//\=submatch(1).i/|let i=i+1   #将文中出现的所有asd数字替换为asd数字（数字从0开始，每次递增1）
-  ```
-
-  参考文献： http://blog.itpub.net/25897606/viewspace-746838/  
 
 * diff命令
 
