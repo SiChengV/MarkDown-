@@ -354,7 +354,7 @@ AF_UNIX：代表本地连接
     int len = 0;
     const struct inotify_event *event;    // 保存具体的一个事件内容
     while (len = read(notifyFd, buf, sizeof(buf))) {   // 读取notifyFd中保存的事件信息到buf
-        if (len < 0) {
+        if (len <= 0) {
             break;
         }
       	// 将buf中的内容转换为inotify_event类型并进行处理
@@ -466,6 +466,13 @@ AF_UNIX：代表本地连接
       #   0	命令成功结束
       #   1	一般性未知错误
       #   2	不适合的shell指令
+      
+  # 定义变量 变量加减
+  num=1
+  let num+=1
+  
+  # 获取上条指令的运行结果
+  pid=`pidof xxx`
   ```
 
 * diff命令
@@ -525,11 +532,11 @@ AF_UNIX：代表本地连接
   
 * **-exec / -ok / xargs**
 
-  `find ./ -maxdepth 1 -type f -exec rm -r {} \;`：将前面find指令的结果传给后面的{}然后执行后面的指令
+  `find ./ -maxdepth 1 -type f -exec rm -r {} \;`：将前面find指令的结果传给后面的{}然后执行后面的指令。将前面的命令分段依次传给后面的命令，传一个执行一次命令。
 
   `find ./ -maxdepth 1 -type f -ok rm -r {} \;`：将前面find指令的结果传给后面的{}然后执行后面的指令，会让你确认是否删除
 
-  `find ./ -maxdepth 1 -type f | xargs  rm -r `：将前面find指令的结果传给后面，然后执行后面的指令,当结果集过大时会分段 ，因此比-exec优越，但xargs命令对传过来的结果集默认以空格分割，因此如果一个文件名中有空格，如：abc dd，那么xargs会把这一个文件看成两个文件：abc和dd，解决办法是两个命令都加上-print0：以null分割结果集。xargs将前面的内容作为参数传给后续命令执行，而不是文本内容。
+  `find ./ -maxdepth 1 -type f | xargs  rm -r `：将前面find指令的结果传给后面，然后执行后面的指令,当结果集过大时会分段 ，因此比-exec优越，但xargs命令对传过来的结果集默认以空格分割，因此如果一个文件名中有空格，如：abc dd，那么xargs会把这一个文件看成两个文件：abc和dd，解决办法是两个命令都加上-print0：以null分割结果集。xargs将前面的内容作为参数传给后续命令执行，而不是文本内容。将前面命令一股脑的甩给后面的命令作为参数，只执行一次后面的命令。
 
 ### linux杂项知识
 
@@ -538,6 +545,8 @@ AF_UNIX：代表本地连接
 ```shell
 export LD_LIBRARY_PATH=自己的动态链接库路径:$LD_LIBRARY_PATH
 ```
+
+/etc/ld.so.conf文件内记录了要搜索库的路径，使用ldconfig会搜索这些路径，并将文件加载到ld.so.cache内
 
 去除export过的环境变量：`unset LD_LIBRARY_PATH`
 

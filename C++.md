@@ -193,7 +193,7 @@ Google的gflags开源库有类似的功能
 
 ## 现代C++特性
 
-#### std::chrono库
+### std::chrono库
 
 头文件\<chrono>
 
@@ -226,23 +226,23 @@ system_clock的计时单位是$10^{-7}$秒
 
 nanoseconds：纳秒。microseconds：微秒。
 
-#### Atomic
+### Atomic
 
 原子变量，使用原子变量来改造存在资源竞争的变量，可以不使用互斥量和锁来对变量实现原子操作
 
 eg：`std::atomic<int> globalVariable = 0;`  即可将globalVariable变成一个原子的int变量
 
-#### Bitset
+### Bitset
 
 位运算操作使用
 
 参考资料：https://www.cnblogs.com/rabbithu/p/bitset.html
 
-#### 新特性string_view
+### 新特性string_view
 
 相当于一个只读的string，注意不可用string来初始化，不可对观察的对象进行修改操作，它不管理内存，只保存指针和长度，所以效率高
 
-注意string_view.data()返回的是原始字符串数组的指针，会打印完整的原始字符串
+注意string_view.data()返回的是原始字符串数组的指针，会打印完整的原始字符串，<font color="red">使用data函数时需特别小心</font>
 
 string&不能代替string_view的原因：
 
@@ -263,11 +263,11 @@ string&不能代替string_view的原因：
 
 2. string_view允许不拷贝的情况下使用string的子串
 
-#### 新特性span
+### 新特性span
 
 在内存上连续对象的观察者，类似于string_view，可以解决数组指针退化，和越界访问的问题
 
-#### decltype
+### decltype
 
 ```c++
 // 此例中用auto和decltype推导一个引用类型，可以看到使用auto推导会丢失引用，而decltype不会
@@ -284,7 +284,7 @@ return 0;
 
 auto根据等号右边的初始值自动推导类型，而decltype根据括号中的表达式推导类型，和等号右边无关，因此可以用decltype声明一个变量而auto不行
 
-#### random库
+### random库
 
 生成随机数种子，避免了使用rand和srand的时候在一秒内的随机数种子相同的情况（srand的传输time(NULL)精确到秒）
 
@@ -310,6 +310,25 @@ std::string getRandomVal(int len){
 	return buff;
 }
 ```
+
+### 锁
+
+<font size=5>互斥锁 std::mutex</font>
+
+```c++
+ // xxx
+```
+
+<font size=5>读写锁 std::shared_mutex(c++17) / std::shared_timed_mutex(c++14)</font>
+
+允许多个线程同时读，但同一时刻只允许一个线程进行写，且读写会互相阻塞
+
+```c++
+std::unique_lock<std::shared_timed_mutex> lockGuard(dirMonitorMutex_);  // 使用unique_lock来对写操作进行加锁
+std::shared_lock<std::shared_timed_mutex> lockGuard(dirMonitorMutex_);   // 使用shared_lock来对读操作进行加锁
+```
+
+
 
 ## 设计模式
 
