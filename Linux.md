@@ -282,7 +282,7 @@ AF_UNIX：代表本地连接
 
   有颜色则代表可以触发，epoll_wait在events参数中设置EPOLLET表示监听为边缘触发
 
-  水平触发和边缘触发
+  水平触发（默认）和边缘触发(EPOLLET)
 
   ![截屏2022-03-14 下午7.31.55](./Linux.assets/截屏2022-03-14 下午7.31.55.png)
 
@@ -295,7 +295,7 @@ AF_UNIX：代表本地连接
   // 2.用epoll_ctl添加监视，需要提前写好struct epoll_event结构体
       struct epoll_event event;
       event.data.fd = sockFd;
-      event.events = EPOLLIN;
+      event.events = EPOLLIN;    // 边缘触发可在这里用 | 添加 ，默认为水平触发
       epoll_ctl(epfd, EPOLL_CTL_ADD, sockFd, &event);  // 监视sockFd
   // 3.使用epoll_wait阻塞进程，需提前创建一个readyQueue数组，用来存放就绪队列
       // 创建就绪队列
@@ -399,9 +399,17 @@ AF_UNIX：代表本地连接
 
 * `mount -o remount,rw,exec /`  给根目录添加读写、可执行权限
 
+* mv命令
+
+  mv在同一个分区之内是执行的rename的操作，不会更改inode节点的信息，rename是原子操作，可以看成一瞬间就能完成。而如果跨分区进行mv 的话，就需要对文件进行复制+修改文件属性，涉及的时间就会比同分区mv大大加长，实际的inode也会发生改变。
+
 * ps
 
   `ps -T -p $pid` 查看所有线程
+
+* top
+
+  `top -H -p ${pid}` 查看这个进程的所有线程占用cpu大小
 
 * `hexdump`：以x进制方式查看文件
 
@@ -474,6 +482,18 @@ AF_UNIX：代表本地连接
   # 获取上条指令的运行结果
   pid=`pidof xxx`
   ```
+
+  shell  set命令
+
+  设置flag，用来触发某一效果
+
+  `set -` 恢复默认设置
+
+  `set -x` 输出每一句执行的命令到stderr里面
+
+  `set +o noclobber`   防止使用> 重定向
+
+  
 
 * diff命令
 
