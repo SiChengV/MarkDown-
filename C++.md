@@ -15,6 +15,7 @@
 using std::bind;  // 引入std命名空间的bind函数  后续使用时不用再加std::
 ```
 
+<<<<<<< HEAD
 #### Struct结构体
 
 \__attribute__((packed, aligned(X)))用法，自定义字节对齐
@@ -61,6 +62,55 @@ void Myfun(const T typeInfo)
 
 
 
+||||||| 9f0140f
+=======
+#### Struct结构体
+
+\__attribute__((packed, aligned(X)))用法，自定义字节对齐
+
+```c++
+typedef struct
+{
+     char Data1;
+     //3-Bytes Added here.
+     int Data2;
+     unsigned short Data3;
+     char Data4;
+     //1-byte Added here.
+
+}sSampleStruct;
+sizof(sSampleStruct)    //  12字节
+typedef struct
+{
+     char Data1;
+     //3-Bytes Added here.
+     int Data2;
+     unsigned short Data3;
+     char Data4;
+     //1-byte Added here.
+
+}__attribute__((packed, aligned(1))) sSampleStruct;
+sizof(sSampleStruct)    //  8字节
+
+```
+
+#### 模板
+
+限制模板特化的类型，不在可选范围内则报错
+
+```c++
+// 需搭配enable_if和is_same使用，如果函数参数类型不为myClass1或myClass2的话则编译报错
+template <typename T, typename = typename std::enable_if<std::is_same<myClass1, T>::value ||
+    std::is_same<myClass2, T>::value, T>::type>
+void SetMsgTypeInfo(const T typeInfo)
+{
+    // code here
+}
+```
+
+
+
+>>>>>>> f4d205219d9049b61eb6542150b1cc3a92cec099
 #### 强制类型转换
 
 * dynamic_cast
