@@ -15,6 +15,10 @@
   快捷键：
 
   ```
+  :tabnew filname 多标签
+  gt：切换到下一个标签
+  gT：切换到上一个标签
+  
   h、j、k、l：右、下、左、上。H：屏幕第一个字符，L：屏幕最后一行的第一个字符
   w、b、e：跳到下个单词词首、跳到本单词或上个单词词首、跳到本单词或下个单词词尾
   gg：跳到第一行，G：跳到最后一行，5G：跳到第五行
@@ -50,9 +54,6 @@
   :sp 上下分屏
   :vsp 左右分屏
   ctrl + w ctrl + w：在窗口之间切换
-  :tabnew filname 多标签
-  gt：切换到下一个标签
-  gT：切换到上一个标签
   ctrl + d：查看可选的命令补全
   到达最后一行：G，到达首行：gg
   到达某一行：行号+G
@@ -207,6 +208,10 @@
 - /etc/bashrc —— 为每一个运行bash shell的用户执行此文件.当bash shell被打开时,该文件被读取；
 - ~/.profile —— 每个用户都可使用该文件输入专用于自己使用的shell信息，当用户登录时，该文件仅仅执行一次！默认情况下,它设置一些环境变量,执行用户的.bashrc文件；
 - ~/.bashrc —— 该文件包含专用于你的bash shell的bash信息,当登录时以及每次打开新的shell时,该文件被读取；
+
+<font size=5>进程使用的环境变量</font>
+
+进程使用的环境变量可以通过`cat /proc/进程pid/environ`查看
 
 ### Socket知识
 
@@ -466,6 +471,8 @@ AF_UNIX：代表本地连接
 
 * SHELL使用
 
+  shell脚本中设置的环境变量只对shell脚本本身及其子shell有效，对其父shell和其他shell无效
+
   **shell变量**
 
   ```shell
@@ -483,7 +490,7 @@ AF_UNIX：代表本地连接
   pid=`pidof xxx`
   ```
 
-  shell  set命令
+  shell中常用的 set命令
 
   设置flag，用来触发某一效果
 
@@ -583,3 +590,18 @@ export LD_LIBRARY_PATH=自己的动态链接库路径:$LD_LIBRARY_PATH
 #### date
 
 `date +%Y-%m-%d' '%H:%M:%S.%N`  打印时间，精确到纳秒
+
+#### Linux用户权限（UID）
+
+* RUID：实际用户ID
+
+* EUID：有效用户ID
+
+  通常情况下等于RUID
+
+* SUID：设置用户ID
+
+  跟文件绑定而不是更用户绑定
+
+以passwd程序为例：通过ll查看passwd二进制的权限可以看到有s位，此位即说明SUID位，passwd修改的是/etc/shadow文件，而此文件的属性为 644 root:root，说明非root用户是无法写此文件的，运行有SUID位的进程会让此进程的属主变成其二进制的属主，相当于提权操作。
+
