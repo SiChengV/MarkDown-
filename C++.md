@@ -102,10 +102,28 @@ Widget w1 = w2   调用拷贝构造函数
 
 w1 = w2 调用赋值运算符函数
 
-#### const
+#### c++关键字
+
+<font size=5>const</font>
 
 顶层const：int *const p1
 底层const：const int *p2
+
+<font size=5>thread_local</font>
+
+thread_local和static类似：static为全局存储期，全局仅一个。thrad_local为线程存储期，即每个线程都会有一个
+
+thread_local 声明等价于 static thread_local
+
+#### numeric_limits
+
+`#include <limits>`
+
+可以通过numeric_limits获取一个类型的最大、最小值
+
+```c++
+cout << numeric_limits<uint16_t>::max() << endl;   // out: 65535
+```
 
 #### 回调函数与std::function与std::bind
 
@@ -117,6 +135,7 @@ w1 = w2 调用赋值运算符函数
 class A{
 public:
     int fun(int){xxx}
+    int fun2(){xxx}
 }
 
 A a;
@@ -124,6 +143,9 @@ A a;
 // function模板类型指定了调用被调函数时的返回值和参数
 // bind的参数为 1. 被调类成员函数地址，对象指针， 预留参数
 function<int(int)> = bind(&A::func, &a, std::placeholders::_1);    
+
+// 无参数情况下的function使用
+function<int()> = bind
 ```
 
 注意：
@@ -327,6 +349,12 @@ string&不能代替string_view的原因：
 
 ### decltype
 
+decltype的推导规则可以简单概述如下：
+
+* 如果exp是一个不被括号()包围的表达式，或者是一个类成员访问表达式，或者是一个单独的变量，decltype(exp)的类型和exp一致
+* 如果exp是函数调用，则decltype(exp)的类型就和函数返回值的类型一致
+* 如果exp是一个左值，或被括号()包围，decltype(exp)的类型就是exp的引用，假设exp的类型为T，则decltype(exp)的类型为T&
+
 ```c++
 // 此例中用auto和decltype推导一个引用类型，可以看到使用auto推导会丢失引用，而decltype不会
 int a = 10;
@@ -340,7 +368,7 @@ cout << "auto : " << p << endl;   // auto：20 未修改成30
 return 0;
 ```
 
-auto根据等号右边的初始值自动推导类型，而decltype根据括号中的表达式推导类型，和等号右边无关，因此可以用decltype声明一个变量而auto不行
+auto根据等号右边的初始值自动推导类型，而decltype根据括号中的表达式推导类型，和等号右边无关，因此可以用decltype声明一个变量而auto不行。decltype不会真的去执行推导的表达式。
 
 ### random库
 

@@ -19,6 +19,9 @@
   gt：切换到下一个标签
   gT：切换到上一个标签
   
+  :%s/old/new/g 可以替换 old 为 new（%表示从第一行到最后一行）（g：此行中的全部匹配项）（不加/g：此行中第一个匹配项）
+  :#,#s/old/new/g ：在两行内替换所有的字符串 old 为新的字符串 new
+  
   h、j、k、l：右、下、左、上。H：屏幕第一个字符，L：屏幕最后一行的第一个字符
   w、b、e：跳到下个单词词首、跳到本单词或上个单词词首、跳到本单词或下个单词词尾
   gg：跳到第一行，G：跳到最后一行，5G：跳到第五行
@@ -46,8 +49,7 @@
   cl：删除光标字符并进入插入模式
   在文件中查找某个词：/xxx , 跳到下一个匹配目标：n,上一个：N
   :set hls ：高亮显示所有查找内容。:nohlsearch ：移除高亮显示
-  :s/old/new/g 可以替换 old 为 new（g：此行中的全部匹配项）（不加/g：此行中第一个匹配项）
-  :#,#s/old/new/g ：在两行内替换所有的字符串 old 为新的字符串 new
+  
   :! ：后接外部命令可以执行外部命令
   设置文件行号：:set nu， 取消行号：:set nonu
   ctrl + g：查看当前行及文件信息
@@ -142,6 +144,12 @@
 
 * `q`：退出gdb
 
+* 后台( 异步 )执行调试命令  `command&` command可选：run,attach,step,stepi,next,nexti, continue, finish, until
+
+* 查看当前栈的汇编指令：`disassemble`
+
+* 查看寄存器：`i registers` ，查看所有寄存器 `i all-registers`
+
 断点
 
 普通断点 break、观察断点watch和捕捉断点
@@ -214,6 +222,8 @@
 进程使用的环境变量可以通过`cat /proc/进程pid/environ`查看
 
 ### Socket知识
+
+查询系统socket缓存区大小：`cat /proc/sys/net/ipv4/tcp_rmem`。查询出来的三列分别为最小、默认、最大缓存区字节数。
 
 函数原型：`int socket(int domain, int type, int protocol);`
 
@@ -564,6 +574,8 @@ AF_UNIX：代表本地连接
   `find ./ -maxdepth 1 -type f -ok rm -r {} \;`：将前面find指令的结果传给后面的{}然后执行后面的指令，会让你确认是否删除
 
   `find ./ -maxdepth 1 -type f | xargs  rm -r `：将前面find指令的结果传给后面，然后执行后面的指令,当结果集过大时会分段 ，因此比-exec优越，但xargs命令对传过来的结果集默认以空格分割，因此如果一个文件名中有空格，如：abc dd，那么xargs会把这一个文件看成两个文件：abc和dd，解决办法是两个命令都加上-print0：以null分割结果集。xargs将前面的内容作为参数传给后续命令执行，而不是文本内容。将前面命令一股脑的甩给后面的命令作为参数，只执行一次后面的命令。
+  
+* `crontab -e` 编辑定时任务
 
 ### linux杂项知识
 
