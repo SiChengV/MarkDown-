@@ -186,6 +186,7 @@
 
   * `bt`：显示当前程序的栈帧
   * `frame 栈帧编号`：切换当前的栈环境为指定编号栈帧
+  * `thread apply all bt`：打印所有线程的栈帧
 
 多进程/多文件
 
@@ -498,6 +499,16 @@ AF_UNIX：代表本地连接
   
   # 获取上条指令的运行结果
   pid=`pidof xxx`
+  ```
+
+  **循环语句**
+
+  ```shell
+  while ((i <= 100))
+  do
+      sum += i
+      i++
+  done
   ```
 
   shell中常用的 set命令
