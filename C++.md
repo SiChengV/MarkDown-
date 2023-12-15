@@ -9,10 +9,39 @@
 * https://learn.microsoft.com/zh-cn/cpp/cpp/cpp-language-reference?view=msvc-170
   微软提供的c++语言参考
 
+#### 条件变量
+
+```c++
+void wait( std::unique_lock<std::mutex>& lock, Predicate stop_waiting );
+
+// 上面等同于，即加上谓语判断则对虚假唤醒情况进行保护
+while (!stop_waiting()) {
+    wait(lock);
+}
+```
+
+
+
 #### 命名空间
 
 ```c++
 using std::bind;  // 引入std命名空间的bind函数  后续使用时不用再加std::
+```
+
+```c++
+// 匿名命名空间，命名空间具有internal链接属性，即名称的作用域被限制在当前的文件中
+namespce {
+    char c;
+    int i;
+    double d;
+}
+// 编译器在内部会为这个命名空间生成一个唯一的名字，而且还会为这个匿名的命名空间生成一条using指令。所以上面的代码在效果上等同于：
+namespace __UNIQUE_NAME_ {
+    char c;
+    int i;
+    double d;
+}
+using namespace __UNIQUE_NAME_;
 ```
 
 #### Struct结构体
@@ -139,7 +168,7 @@ public:
 }
 
 A a;
-// 已绑定成员函数为例
+// 以绑定成员函数为例
 // function模板类型指定了调用被调函数时的返回值和参数
 // bind的参数为 1. 被调类成员函数地址，对象指针， 预留参数
 function<int(int)> = bind(&A::func, &a, std::placeholders::_1);    
@@ -265,7 +294,7 @@ Google的gflags开源库有类似的功能
   提供拷贝，且允许拷贝源数据地址和目的数据地址有重叠
 
   ```c++
-  // first 其实源数据地址   count 拷贝字节数  result 拷贝目的地址   返回值 指向拷贝后的最后一个数据的后一个元素
+  // first 起始源数据地址   count 拷贝字节数  result 拷贝目的地址   返回值 指向拷贝后的最后一个数据的后一个元素
   OutputIt copy_n( InputIt first, Size count, OutputIt result );
   ```
 
