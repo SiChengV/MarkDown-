@@ -19,6 +19,12 @@
 * `-p0` 代表保存原始目录，不跳过任何目录
 * `-R`  补丁回退，相当于text2.txt复原到text1.txt
 
+### 磁盘IO
+
+fflush将数据从用户缓冲区刷写到内核缓存区
+
+fsync将内核缓存区数据刷写到磁盘，同步等磁盘写入完毕后才返回
+
 ### CGROUPS
 
 > 参考资料：https://tech.meituan.com/2015/03/31/cgroups.html

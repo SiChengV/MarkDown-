@@ -1,6 +1,18 @@
 [TOC]
 
-# C++
+# C&C++
+
+## C知识
+
+文件缓冲与写磁盘
+
+ sync:将所有修改过的快缓存区排入写队列，然后返回，并不等待实际写磁盘操作结束；
+
+ fsync函数：只对有文件描述符制定的单一文件起作用，并且等待些磁盘操作结束，然后返回；
+
+ fdatasync：类似fsync，但它只影响文件的数据部分。fsync还会同步更新文件的属性；
+
+ fflush：标准I/O函数（如：fread，fwrite）会在内存建立缓冲，该函数刷新内存缓冲，将内容写入内核缓冲，要想将其写入磁盘，还需要调用fsync。（先调用fflush后调用fsync，否则不起作用）。
 
 ## C++知识
 
@@ -114,7 +126,7 @@ class A{
 public:
    A():a(10){cout << "A()" << endl;}
    A(int b){this->b = b;cout << "A(int b)" << endl;}
-   int a;
+   int a{9};      // 同时存在初始化列表和默认初始化时，最终生效的值为初始化列表中的值
    int b;
 };
 
@@ -302,6 +314,10 @@ Google的gflags开源库有类似的功能
 
 ## 现代C++特性
 
+### std::error_code
+
+由两部分组成，errorCode枚举类，以及一个继承自std::error_category的类,此类包含了错误说明
+
 ### std::chrono库
 
 头文件\<chrono>
@@ -376,6 +392,8 @@ string&不能代替string_view的原因：
 
 在内存上连续对象的观察者，类似于string_view，可以解决数组指针退化，和越界访问的问题
 
+`span<const int> sp  `  代表sp指向的内容不可修改
+
 ### decltype
 
 decltype的推导规则可以简单概述如下：
@@ -439,6 +457,8 @@ std::string getRandomVal(int len){
 允许多个线程同时读，但同一时刻只允许一个线程进行写，且读写会互相阻塞
 
 ```c++
+#include <shared_mutex>
+
 std::unique_lock<std::shared_timed_mutex> lockGuard(dirMonitorMutex_);  // 使用unique_lock来对写操作进行加锁
 std::shared_lock<std::shared_timed_mutex> lockGuard(dirMonitorMutex_);   // 使用shared_lock来对读操作进行加锁
 ```

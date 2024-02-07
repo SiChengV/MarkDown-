@@ -2,18 +2,36 @@
 
 调试py文件：`python -m pdb xxxx.py`
 
+## 时间
+
+获取时间戳：
+
+```python
+import os
+import time
+current_time = time.time()    # 获取当前时间戳
+
+ctime = os.path.getmtime("xxx")   # 获取某一文件的修改时间戳
+ctime = os.path.getctime("xxx")   # 获取某一文件的创建时间戳
+
+```
+
 ## subprocess模块
 
 ```python
 import subprocess
 
-str = subprocess.getoutput(cmd)  # 接收字符串格式的命令，执行命令并返回执行结果，其功能类似于os.popen(cmd).read()和commands.getoutput(cmd)。会等程序执行完后获取结果
+str = subprocess.getoutput(cmd)  # 接收字符串格式的命令，执行命令并返回执行结果，其功能类似于os.popen(cmd).read()和commands.getoutput(cmd)。会等程序执行完后获取结果  无法执行复杂shell命令，它会将整个字符串当做一个目录去寻找对应二进制，因此此情景可用Popen来执行
 
-subprocess.call()   # 执行指定的命令，返回命令执行状态，其功能类似于os.system(cmd)。
+subprocess.run()   # 执行指定的命令，返回命令执行状态，其功能类似于os.system(cmd)，但是其会等待命令执行完。可使用shell调用
 
-p = subprocess.Popen("xxx", shell=True)    # 执行指定命令，异步调用
+p = subprocess.Popen("xxx", shell=True, stdout=subprocess.PIPE)    # 执行指定命令，异步调用，使用shell脚本来调用命令，输出重定向到PIPE中   重定向后需要使用p.stdout.close()来关闭iobuffer
 p.terminate()
 p.wait()     # 终止命令时需要等待命令成功终止
+
+# 获取执行结果，需使用stdout=subprocess.PIPE重定向输出
+out, err = p.communicate()
+print(out.decode())   # 执行输出内容
 ```
 
 
@@ -44,9 +62,9 @@ python内建测试框架
 
 `import unittest` 引入unittest
 
+运行单个测试用例：`python -m unittest -v test.LogTest.test_ChangeLogLevel`   -v 后为文件名.类名.成员函数名
+
 unittest中最核心的四个概念是：test case，test suite，test runner，test fixture
-
-
 
 <font size="5">**test case**</font>
 
@@ -118,6 +136,18 @@ runner.run(suite)
 | [`assertNotIn(a, b)`](https://docs.python.org/zh-cn/3/library/unittest.html#unittest.TestCase.assertNotIn) | `a not in b`           | 3.1      |
 | [`assertIsInstance(a, b)`](https://docs.python.org/zh-cn/3/library/unittest.html#unittest.TestCase.assertIsInstance) | `isinstance(a, b)`     | 3.2      |
 | [`assertNotIsInstance(a, b)`](https://docs.python.org/zh-cn/3/library/unittest.html#unittest.TestCase.assertNotIsInstance) | `not isinstance(a, b)` | 3.2      |
+
+| 方法                                                         | 检查对象                                            | 引入版本 |
+| :----------------------------------------------------------- | :-------------------------------------------------- | :------- |
+| [`assertAlmostEqual(a, b)`](https://docs.python.org/zh-cn/3/library/unittest.html#unittest.TestCase.assertAlmostEqual) | `round(a-b, 7) == 0`                                |          |
+| [`assertNotAlmostEqual(a, b)`](https://docs.python.org/zh-cn/3/library/unittest.html#unittest.TestCase.assertNotAlmostEqual) | `round(a-b, 7) != 0`                                |          |
+| [`assertGreater(a, b)`](https://docs.python.org/zh-cn/3/library/unittest.html#unittest.TestCase.assertGreater) | `a > b`                                             | 3.1      |
+| [`assertGreaterEqual(a, b)`](https://docs.python.org/zh-cn/3/library/unittest.html#unittest.TestCase.assertGreaterEqual) | `a >= b`                                            | 3.1      |
+| [`assertLess(a, b)`](https://docs.python.org/zh-cn/3/library/unittest.html#unittest.TestCase.assertLess) | `a < b`                                             | 3.1      |
+| [`assertLessEqual(a, b)`](https://docs.python.org/zh-cn/3/library/unittest.html#unittest.TestCase.assertLessEqual) | `a <= b`                                            | 3.1      |
+| [`assertRegex(s, r)`](https://docs.python.org/zh-cn/3/library/unittest.html#unittest.TestCase.assertRegex) | `r.search(s)`                                       | 3.1      |
+| [`assertNotRegex(s, r)`](https://docs.python.org/zh-cn/3/library/unittest.html#unittest.TestCase.assertNotRegex) | `not r.search(s)`                                   | 3.2      |
+| [`assertCountEqual(a, b)`](https://docs.python.org/zh-cn/3/library/unittest.html#unittest.TestCase.assertCountEqual) | *a* 和 *b* 具有同样数量的相同元素，无论其顺序如何。 | 3.2      |
 
 <font size="5">**执行输出**</font>
 
