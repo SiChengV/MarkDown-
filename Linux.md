@@ -2,7 +2,58 @@
 
 
 
+# Linux
+
 ## Linux知识
+
+### 编译工具GCC/G++
+
+使用-c参数编译生成.o中间文件：`g++ -c xxx.cpp -o xxx.o`
+
+### PATCH补丁命令
+
+制作补丁：`diff text1.txt text2.txt > text.patch`  ，patch是基于diff出来的数据去打补丁的。
+
+使用patch文件对源文件打补丁：`patch -p0 text1.txt text.patch`  ，打补丁完成后，text1.txt的内容则和text2.txt保持一致。
+
+注意：patch时源文件同一行有修改，或patch里记录的行有修改会导致patch失败
+
+**参数：**
+
+* `-p0` 代表保存原始目录，不跳过任何目录
+* `-R`  补丁回退，相当于text2.txt复原到text1.txt
+
+### 磁盘IO
+
+fflush将数据从用户缓冲区刷写到内核缓存区
+
+fsync将内核缓存区数据刷写到磁盘，同步等磁盘写入完毕后才返回
+
+### CGROUPS
+
+> 参考资料：https://tech.meituan.com/2015/03/31/cgroups.html
+>
+> 红帽社区资料 https://access.redhat.com/documentation/zh-cn/red_hat_enterprise_linux/8/html/managing_monitoring_and_updating_the_kernel/what-kernel-resource-controllers-are_setting-limits-for-applications
+
+cgroups 的全称是control groups，cgroups为每种可以控制的资源定义了一个子系统。是Linux内核提供的一种可以限制单个进程或者多个进程所使用资源的机制，可以对 cpu，内存等资源实现精细化的控制。典型的子系统介绍如下：1.cpu 子系统，主要限制进程的 cpu 使用率。2.cpuacct 子系统，可以统计 cgroups 中的进程的 cpu 使用报告。3.cpuset 子系统，可以为 cgroups 中的进程分配单独的 cpu 节点或者内存节点。4.memory 子系统，可以限制进程的 memory 使用量。5.blkio 子系统，可以限制进程的块设备 io。6.devices 子系统，可以控制进程能够访问某些设备，等等多个子系统功能。
+
+<font size=5>**cpu子系统**</font>
+
+* cpu.cfs_quota_us和cpu.cfs_period_us配合使用可限制cpu的绝对使用上限
+
+<font size=5>**cgroups使用方法**</font>
+
+cgroups通过VFS吧相关功能暴露给用户
+
+* 创建cgroups层级结构
+
+  cgroups其实就是个虚拟文件系统，通过cgroups文件系统来维护，因此使用的话需要先挂载cgroups文件系统，格式为: `mount -t cgroup -o subsystems name /cgroup/name`，其中 subsystems 表示需要挂载的 cgroups 子系统， /cgroup/name 表示挂载点，如上文所提，这条命令同时在内核中创建了一个cgroups 层级结构。比如挂载 cpuset, cpu, cpuacct, memory 4个subsystem到/cgroup/cpu_and_mem 目录下，就可以使用 `mount -t cgroup -o remount,cpu,cpuset,memory cpu_and_mem /cgroup/cpu_and_mem`
+
+* 加入子节点和进程
+
+  挂载某一个 cgroups 子系统到挂载点之后，就可以通过在挂载点下面建立文件夹或者使用cgcreate命令的方法创建 cgroups 层级结构中的节点。比如通过命令`cgcreate -t sankuai:sankuai -g cpu:test`就可以在 cpu 子系统下建立一个名为 test 的节点。然后可以通过写入需要的值到 test 下面的不同文件，来配置需要限制的资源。当需要删除某一个 cgroups 节点的时候，可以使用 cgdelete 命令，比如要删除上述的 test 节点，可以使用 `cgdelete -r cpu:test`命令进行删除。把进程加入到 cgroups 子节点也有多种方法，可以直接把 pid 写入到子节点下面的 task 文件中。也可以通过 cgclassify 添加进程，格式为 `cgclassify -g subsystems:path_to_cgroup pidlist`
+
+
 
 ### VIM
 
@@ -18,6 +69,9 @@
   :tabnew filname 多标签
   gt：切换到下一个标签
   gT：切换到上一个标签
+  
+  :%s/old/new/g 可以替换 old 为 new（%表示从第一行到最后一行）（g：此行中的全部匹配项）（不加/g：此行中第一个匹配项）
+  :#,#s/old/new/g ：在两行内替换所有的字符串 old 为新的字符串 new
   
   h、j、k、l：右、下、左、上。H：屏幕第一个字符，L：屏幕最后一行的第一个字符
   w、b、e：跳到下个单词词首、跳到本单词或上个单词词首、跳到本单词或下个单词词尾
@@ -46,8 +100,7 @@
   cl：删除光标字符并进入插入模式
   在文件中查找某个词：/xxx , 跳到下一个匹配目标：n,上一个：N
   :set hls ：高亮显示所有查找内容。:nohlsearch ：移除高亮显示
-  :s/old/new/g 可以替换 old 为 new（g：此行中的全部匹配项）（不加/g：此行中第一个匹配项）
-  :#,#s/old/new/g ：在两行内替换所有的字符串 old 为新的字符串 new
+  
   :! ：后接外部命令可以执行外部命令
   设置文件行号：:set nu， 取消行号：:set nonu
   ctrl + g：查看当前行及文件信息
@@ -116,7 +169,33 @@
 
 参考文献： http://blog.itpub.net/25897606/viewspace-746838/  
 
+需要对匹配内容的值做数值计算需要使用`\=submatch(1)`形式获得匹配的内容
+
+将匹配到的内容作为后续替换时的输入：
+
+将后续需要使用到的内容用括号括入，在替换内容部分使用`\1`、`\2`等代表第一个、第二个括号中的内容，eg：`:%s/\(.*FileSize=\)/\1111/g` 将FileSize=后的内容替换为111
+
+参考文献：https://vim.fandom.com/wiki/Search_and_replace
+
+<font color=red>注意：</font>vim中使用正则表达式的元字符时，除了.*$^这类常用的之外，其他元字符需要使用\进行转义
+
+### 正则表达式
+
+排除某个字符：`[^A]`
+
+\s元字符：它表示匹配任意空白字符（包括空格、制表符、换行符等）。
+
+\d元字符：匹配所有数字
+
 ### GDB
+
+调试正在运行的程序：`gdb {program} {pid}` 或 `gdb -p {pid}`
+
+查看信息 info，缩写 i
+
+* info proc mapping  查看进程地址映射信息
+* info locals  查看栈帧变量
+* 查看寄存器：`i registers` ，查看所有寄存器 `i all-registers`
 
 常规
 
@@ -142,6 +221,11 @@
 
 * `q`：退出gdb
 
+* 后台( 异步 )执行调试命令  `command&` command可选：run,attach,step,stepi,next,nexti, continue, finish, until
+
+* 查看当前栈的汇编指令：`disassemble`
+
+
 断点
 
 普通断点 break、观察断点watch和捕捉断点
@@ -151,13 +235,15 @@
 * `disable`：使断点暂时失效
 * `enable`：让断点重新生效
 * `d 行号`：删除断点 
-* `info b`：查看断点信息表
 * `continue/c`：执行到下一个断点，无断点则执行完整个程序
 * `finish`：结束当前函数调用，跳到函数调用入口
+* `until`：跳出代码循环体
 
 查看变量
 
 * `p/print 变量`：查看变量的值
+
+* `p $_siginfo` 打印接收到的信号的详细信息，例如：si_code表示信号产生的方式，si_pid表示发送信号的进程  相关信息可以看siginfo.h源码
 
 * `display 变量`：设置跟踪变量
 
@@ -178,15 +264,100 @@
 
   * `bt`：显示当前程序的栈帧
   * `frame 栈帧编号`：切换当前的栈环境为指定编号栈帧
+  * `thread apply all bt`：打印所有线程的栈帧
 
 多进程/多文件
 
 * `b 函数名/ b 文件名:行号`：对指定的函数或源文件打断点
+* tb ：临时断点，只生效一次 
 * `set follow-fork-mode parent/child`：只调试父/子进程
+
+<font size="5">**gdb文件查看源码**</font>
+
+* 编译和gdb运行二进制文件环境不一致导致无法查看源文件 **set substitute-path**
+
+  当带符号表的二进制文件编译出来放到另一个地方跑的时候，用list列出源文件的时候会提示找不到源文件，可以看到提示的路径还是旧的、编译的是文件路径，而在运行环境上想看源文件需把源文件拷到运行环境，并使用`set substitute-path from_path to_path`将gdb搜索的目录替换，比如 list显示的源码是  /home/aaa/1.cpp，那么设置了 `set substitute-path /home/aaa/  /home/bbb/`，之后，即使你的源文件1.cpp 放在 /home/bbb下面也是可以找到的了。因为gdb帮你做了字符串替换。
 
 杂项
 
 * shell：跳到shell执行shell命令，再键入exit退回到gdb
+* `tui enable`或者`layout src`可以打开源代码的UI界面辅助查看，`layout asm`将代码以汇编的形式呈现
+* gdb脚本：`save breakpoints xxx`保存当前断点到脚本中，脚本可以通过`source xxx`读取，读取后将顺序执行脚本中的命令
+
+### perf
+
+Perf工作模式分为Counting Mode和Sampling Mode，Counting Mode将会精确统计一段时间内CPU相关硬件计数器数值的变化，为了统计用户感兴趣的事件，Perf Tool将设置性能控制相关的寄存器，这些寄存器的值将在监控周期结束后被读出，典型工具Perf Stat；Sampling Mode将以定期采样方式获取性能数据，PMU计数器将为某些特定事件配置溢出周期，当计数器溢出时，相关数据如 IP、通用寄存器、EFLAG 将会被捕捉到，典型工具Perf Record。
+
+<font size=5>**perf stat**</font>
+
+可以整体看看程序运行是各种统计时间的大概情况。**Perf stat通过概括精简的方式提供被调试程序运行的整体情况和汇总数据**。
+
+* 使用方法
+
+  ```shell
+   perf stat ./excutbleFile  #停止后即可显示统计结果。可通过-r参数指定重复执行次数
+   perf stat -p $pid -d     #进程级别统计
+   perf stat -a -d sleep 5  #系统整体统计
+   perf stat -p $pid -e 'syscalls:sys_enter' sleep 10  #分析进程调用系统调用的情形
+   perf stat -a sleep 5 #收集整个系统的性能计数，持续5秒
+   perf stat -C 0  #统计CPU 0的信息
+  ```
+
+  显示结果各字段意义：
+
+  - task-clock：CPU利用率，此值越高说明程序的多数时间花费在CPU计算上而非IO，任务真正占用的处理器时间，单位为ms
+  - CPUs utilized ： task-clock/time elapsed (CPU的占用率)
+  - context-swichees：程序在运行过程中的上下文切换次数
+  - page-faults:缺失异常的次数。当应用程序请求的页面尚未建立，请求的页面不在内存中，或者请求的页面虽然在内存中，但物理地址和虚拟地址的映射关系尚未建立时，都会触发一次缺页异常。另外TLB不命中，页面访问权限不匹配等情况也会触发缺页异常。
+  - context-switches：进程切换次数，记录程序运行过程中发生了多少次进程切换，频繁的进程切换是应该避免的；（应该是上下文切换吧？）
+  - cache-misses：程序运行过程中总体的cache利用情况，如果该值过高，说明程序的cache利用不好；
+  - CPU-migrations：表示进程t1运行过程中发生了多少次CPU迁移，即被调度器从一个CPU转移到另外一个CPU上运行；
+  - cycles：处理器时钟，一条指令可能需要多个cycles；
+  - instructions:执行了多少条指令。
+  - IPC：instructions/cycles的比值，该值越大越好，说明程序充分利用了处理器的特性；IPC为平均每个cpu cycle执行了多少条指令。
+  - cache-references：cache命中的次数；
+  - cache-misses：cache失效的次数；
+
+  通过-e选项，可以改变perf stat的缺省事件(perf list查看)，perf stat -h查看帮助信息。
+
+<font size=5>**perf top**</font>
+
+**用于实时统计当前系统的性能信息。**
+
+可通过-e参数列出其他时间的TopN进程/函数，比如-e cache-miss，用于查看谁造成的cache miss最多（-e 可用参数可使用perf list查看）
+
+* 使用方法
+
+  ```shell
+  perf top  #查看所有进程
+  perf top -p $pid  #进程级别   -g 可列出详细信息
+  ...
+  ```
+
+在**perf top界面按h键可以唤起帮助菜单**
+
+<font size=5>**perf record/report**</font>
+
+使用perf top和perf stat之后，对系统性能已经有了一个大致的了解，下面就需要进一步分析更细粒度的信息。**perf record记录单个函数级别的统计信息，并使用perf report来显示统计结果**。
+
+* 使用方法
+
+  ```shell
+  perf record -p $pid
+  perf record -p $pid -g  #详细采用，配合perf report -g使用   不加-g貌似只能以线程为粒度采集
+  perf record -e cpu-clock ./$excutbleFile
+  
+  perf report $file   #查看统计信息
+  perf report -g $file   #查看信息统计信息
+  ```
+
+<font size=5>**perf script**</font>
+
+读取Perf record结果
+
+<font size="5">**perf list**</font>
+
+查看当前支持的所有事件包含硬件事件，软件事件，硬件cache事件，PMU事件以及预设Tracepoint事件
 
 ### apt包管理
 
@@ -215,13 +386,15 @@
 
 ### Socket知识
 
+查询系统socket缓存区大小：`cat /proc/sys/net/ipv4/tcp_rmem`。查询出来的三列分别为最小、默认、最大缓存区字节数。
+
 函数原型：`int socket(int domain, int type, int protocol);`
 
 #### domain参数
 
 AF_UNIX：代表本地连接
 
-### Linux系统编程
+## Linux系统编程
 
 ##### 磁盘刷新、同步（sync、fsync、fdatasync）
 
@@ -377,7 +550,7 @@ AF_UNIX：代表本地连接
 
 
 
-### Linux常用命令
+## Linux常用命令
 
 * `unrar x 文件名`：解压rar压缩的文件
   x为全路径解压，在指定解压路径时会把压缩前的路径一起解压出来
@@ -435,11 +608,19 @@ AF_UNIX：代表本地连接
 
   语法：`awk 'pattern{action}' 文件名`
 
-  pattern原来设定条件
+  <font size="5">pattern用来设定条件</font>
 
-  action原来指定动作
+  例如  `awk ''$1>1{print $1}''` 筛选第一列大于1的行
+
+  pattern里可以修改某一列的值
+
+  <font size="5">action用来指定动作</font>
 
   * print 打印动作
+
+  可以有多个action，以;分隔
+
+  action中使用if的案例：`awk '{if($4) {$4*=$3;$3=1;print} else {print}}' asyslog.conf`  根据$4存不存在走不同分支
 
   变量：
 
@@ -454,13 +635,15 @@ AF_UNIX：代表本地连接
 
 * SED使用
 
-  语法 `sed [-in] [script] [文件名]`
+  语法 `sed [-hnV] [script] [文件名]`
 
   -i：表示直接修改文件
 
+  -e：多点编辑，即-e后接script，并可接多个-e，顺序执行
+
   -n：表示仅显示script处理后的结果
 
-  **动作说明：**
+  **动作说明：（在script中使用）**
 
   - a ：新增， a 的后面可以接字串，而这些字串会在新的一行出现(目前的下一行)～
   - c ：取代， c 的后面可以接字串，这些字串可以取代 n1,n2 之间的行！
@@ -489,6 +672,33 @@ AF_UNIX：代表本地连接
   # 获取上条指令的运行结果
   pid=`pidof xxx`
   ```
+
+  **循环语句**
+
+  ```shell
+  while ((i <= 100))
+  do
+      sum += i
+      ((i++))
+  done
+  ```
+
+  ##### 判断语句
+
+  ```shell
+  # 数值判断
+  value=0
+  if [ $? -eq $value ];then
+          sleep 5
+          command
+  else
+          sleep 1
+          command
+  fi
+  
+  ```
+
+  
 
   shell中常用的 set命令
 
@@ -564,8 +774,10 @@ AF_UNIX：代表本地连接
   `find ./ -maxdepth 1 -type f -ok rm -r {} \;`：将前面find指令的结果传给后面的{}然后执行后面的指令，会让你确认是否删除
 
   `find ./ -maxdepth 1 -type f | xargs  rm -r `：将前面find指令的结果传给后面，然后执行后面的指令,当结果集过大时会分段 ，因此比-exec优越，但xargs命令对传过来的结果集默认以空格分割，因此如果一个文件名中有空格，如：abc dd，那么xargs会把这一个文件看成两个文件：abc和dd，解决办法是两个命令都加上-print0：以null分割结果集。xargs将前面的内容作为参数传给后续命令执行，而不是文本内容。将前面命令一股脑的甩给后面的命令作为参数，只执行一次后面的命令。
+  
+* `crontab -e` 编辑定时任务
 
-### linux杂项知识
+## linux杂项知识
 
 #### 动态库优先搜索路径：
 
@@ -605,3 +817,8 @@ export LD_LIBRARY_PATH=自己的动态链接库路径:$LD_LIBRARY_PATH
 
 以passwd程序为例：通过ll查看passwd二进制的权限可以看到有s位，此位即说明SUID位，passwd修改的是/etc/shadow文件，而此文件的属性为 644 root:root，说明非root用户是无法写此文件的，运行有SUID位的进程会让此进程的属主变成其二进制的属主，相当于提权操作。
 
+#### 秘钥生成
+
+`ssh-keygen` 一路回车，生成秘钥对
+
+将公钥放到机器的~/.ssh/authorized_keys文件下

@@ -1,6 +1,18 @@
 [TOC]
 
-# C++
+# C&C++
+
+## C知识
+
+文件缓冲与写磁盘
+
+ sync:将所有修改过的快缓存区排入写队列，然后返回，并不等待实际写磁盘操作结束；
+
+ fsync函数：只对有文件描述符制定的单一文件起作用，并且等待些磁盘操作结束，然后返回；
+
+ fdatasync：类似fsync，但它只影响文件的数据部分。fsync还会同步更新文件的属性；
+
+ fflush：标准I/O函数（如：fread，fwrite）会在内存建立缓冲，该函数刷新内存缓冲，将内容写入内核缓冲，要想将其写入磁盘，还需要调用fsync。（先调用fflush后调用fsync，否则不起作用）。
 
 ## C++知识
 
@@ -9,10 +21,39 @@
 * https://learn.microsoft.com/zh-cn/cpp/cpp/cpp-language-reference?view=msvc-170
   微软提供的c++语言参考
 
+#### 条件变量
+
+```c++
+void wait( std::unique_lock<std::mutex>& lock, Predicate stop_waiting );
+
+// 上面等同于，即加上谓语判断则对虚假唤醒情况进行保护
+while (!stop_waiting()) {
+    wait(lock);
+}
+```
+
+
+
 #### 命名空间
 
 ```c++
 using std::bind;  // 引入std命名空间的bind函数  后续使用时不用再加std::
+```
+
+```c++
+// 匿名命名空间，命名空间具有internal链接属性，即名称的作用域被限制在当前的文件中
+namespce {
+    char c;
+    int i;
+    double d;
+}
+// 编译器在内部会为这个命名空间生成一个唯一的名字，而且还会为这个匿名的命名空间生成一条using指令。所以上面的代码在效果上等同于：
+namespace __UNIQUE_NAME_ {
+    char c;
+    int i;
+    double d;
+}
+using namespace __UNIQUE_NAME_;
 ```
 
 #### Struct结构体
@@ -85,7 +126,7 @@ class A{
 public:
    A():a(10){cout << "A()" << endl;}
    A(int b){this->b = b;cout << "A(int b)" << endl;}
-   int a;
+   int a{9};      // 同时存在初始化列表和默认初始化时，最终生效的值为初始化列表中的值
    int b;
 };
 
@@ -102,10 +143,28 @@ Widget w1 = w2   调用拷贝构造函数
 
 w1 = w2 调用赋值运算符函数
 
-#### const
+#### c++关键字
+
+<font size=5>const</font>
 
 顶层const：int *const p1
 底层const：const int *p2
+
+<font size=5>thread_local</font>
+
+thread_local和static类似：static为全局存储期，全局仅一个。thrad_local为线程存储期，即每个线程都会有一个
+
+thread_local 声明等价于 static thread_local
+
+#### numeric_limits
+
+`#include <limits>`
+
+可以通过numeric_limits获取一个类型的最大、最小值
+
+```c++
+cout << numeric_limits<uint16_t>::max() << endl;   // out: 65535
+```
 
 #### 回调函数与std::function与std::bind
 
@@ -117,13 +176,17 @@ w1 = w2 调用赋值运算符函数
 class A{
 public:
     int fun(int){xxx}
+    int fun2(){xxx}
 }
 
 A a;
-// 已绑定成员函数为例
+// 以绑定成员函数为例
 // function模板类型指定了调用被调函数时的返回值和参数
 // bind的参数为 1. 被调类成员函数地址，对象指针， 预留参数
 function<int(int)> = bind(&A::func, &a, std::placeholders::_1);    
+
+// 无参数情况下的function使用
+function<int()> = bind
 ```
 
 注意：
@@ -243,13 +306,17 @@ Google的gflags开源库有类似的功能
   提供拷贝，且允许拷贝源数据地址和目的数据地址有重叠
 
   ```c++
-  // first 其实源数据地址   count 拷贝字节数  result 拷贝目的地址   返回值 指向拷贝后的最后一个数据的后一个元素
+  // first 起始源数据地址   count 拷贝字节数  result 拷贝目的地址   返回值 指向拷贝后的最后一个数据的后一个元素
   OutputIt copy_n( InputIt first, Size count, OutputIt result );
   ```
 
   
 
 ## 现代C++特性
+
+### std::error_code
+
+由两部分组成，errorCode枚举类，以及一个继承自std::error_category的类,此类包含了错误说明
 
 ### std::chrono库
 
@@ -325,7 +392,15 @@ string&不能代替string_view的原因：
 
 在内存上连续对象的观察者，类似于string_view，可以解决数组指针退化，和越界访问的问题
 
+`span<const int> sp  `  代表sp指向的内容不可修改
+
 ### decltype
+
+decltype的推导规则可以简单概述如下：
+
+* 如果exp是一个不被括号()包围的表达式，或者是一个类成员访问表达式，或者是一个单独的变量，decltype(exp)的类型和exp一致
+* 如果exp是函数调用，则decltype(exp)的类型就和函数返回值的类型一致
+* 如果exp是一个左值，或被括号()包围，decltype(exp)的类型就是exp的引用，假设exp的类型为T，则decltype(exp)的类型为T&
 
 ```c++
 // 此例中用auto和decltype推导一个引用类型，可以看到使用auto推导会丢失引用，而decltype不会
@@ -340,7 +415,7 @@ cout << "auto : " << p << endl;   // auto：20 未修改成30
 return 0;
 ```
 
-auto根据等号右边的初始值自动推导类型，而decltype根据括号中的表达式推导类型，和等号右边无关，因此可以用decltype声明一个变量而auto不行
+auto根据等号右边的初始值自动推导类型，而decltype根据括号中的表达式推导类型，和等号右边无关，因此可以用decltype声明一个变量而auto不行。decltype不会真的去执行推导的表达式。
 
 ### random库
 
@@ -382,6 +457,8 @@ std::string getRandomVal(int len){
 允许多个线程同时读，但同一时刻只允许一个线程进行写，且读写会互相阻塞
 
 ```c++
+#include <shared_mutex>
+
 std::unique_lock<std::shared_timed_mutex> lockGuard(dirMonitorMutex_);  // 使用unique_lock来对写操作进行加锁
 std::shared_lock<std::shared_timed_mutex> lockGuard(dirMonitorMutex_);   // 使用shared_lock来对读操作进行加锁
 ```
@@ -418,7 +495,8 @@ private:
 };
 ```
 
-<font color="red">析构函数中绝对不要调单例，析构函数中不能确定单例是否已被析构，有造成coredump的可能，即使使用的是Meyers's的单例貌似也不能保证所有情况析构顺序都是一样的</font>
+1. <font color="red">单例的析构函数中绝对不要调其他单例，析构函数中不能确定单例是否已被析构，有造成coredump的可能，即使使用的是Meyers's的单例貌似也不能保证所有情况析构顺序都是一样的</font>
+2. <font color="red">C++中单例模式尽量少用，不得不用时也要保证在Stop函数中停止所有功能，不要在单例的析构函数中访问其他类的成员，因为单例作为全局变量析构是在main函数后去析构的，析构时机不确定。</font>
 
 ## Effective C++
 
