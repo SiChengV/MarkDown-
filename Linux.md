@@ -125,6 +125,12 @@ file(GLOB_RECURSE <variable>
 
 
 
+
+
+### 编译工具GCC/G++
+
+使用-c参数编译生成.o中间文件：`g++ -c xxx.cpp -o xxx.o`
+
 ### PATCH补丁命令
 
 制作补丁：`diff text1.txt text2.txt > text.patch`  ，patch是基于diff出来的数据去打补丁的。
@@ -316,6 +322,8 @@ cgroups通过VFS吧相关功能暴露给用户
 
 * `p $_siginfo` 打印接收到的信号的详细信息，例如：si_code表示信号产生的方式，si_pid表示发送信号的进程  相关信息可以看siginfo.h源码
 
+调试正在运行的程序：`gdb {program} {pid}` 或 `gdb -p {pid}`
+
 查看信息 info，缩写 i
 
 * info proc mapping  查看进程地址映射信息
@@ -362,10 +370,13 @@ cgroups通过VFS吧相关功能暴露给用户
 * `d 行号`：删除断点 
 * `continue/c`：执行到下一个断点，无断点则执行完整个程序
 * `finish`：结束当前函数调用，跳到函数调用入口
+* `until`：跳出代码循环体
 
 查看变量
 
 * `p/print 变量`：查看变量的值
+
+* `p $_siginfo` 打印接收到的信号的详细信息，例如：si_code表示信号产生的方式，si_pid表示发送信号的进程  相关信息可以看siginfo.h源码
 
 * `display 变量`：设置跟踪变量
 
@@ -391,7 +402,14 @@ cgroups通过VFS吧相关功能暴露给用户
 多进程/多文件
 
 * `b 函数名/ b 文件名:行号`：对指定的函数或源文件打断点
+* tb ：临时断点，只生效一次 
 * `set follow-fork-mode parent/child`：只调试父/子进程
+
+<font size="5">**gdb文件查看源码**</font>
+
+* 编译和gdb运行二进制文件环境不一致导致无法查看源文件 **set substitute-path**
+
+  当带符号表的二进制文件编译出来放到另一个地方跑的时候，用list列出源文件的时候会提示找不到源文件，可以看到提示的路径还是旧的、编译的是文件路径，而在运行环境上想看源文件需把源文件拷到运行环境，并使用`set substitute-path from_path to_path`将gdb搜索的目录替换，比如 list显示的源码是  /home/aaa/1.cpp，那么设置了 `set substitute-path /home/aaa/  /home/bbb/`，之后，即使你的源文件1.cpp 放在 /home/bbb下面也是可以找到的了。因为gdb帮你做了字符串替换。
 
 杂项
 
@@ -403,6 +421,10 @@ cgroups通过VFS吧相关功能暴露给用户
 
 * `-Wl,--no-as-needed xxxx`   强制链接动态库
 * `-Wl,--as-needed`      忽略链接时没有用到的静态库，链接器默认使用此参数
+* `tui enable`或者`layout src`可以打开源代码的UI界面辅助查看，`layout asm`将代码以汇编的形式呈现
+* gdb脚本：`save breakpoints xxx`保存当前断点到脚本中，脚本可以通过`source xxx`读取，读取后将顺序执行脚本中的命令
+
+## Perf性能分析工具
 
 ### perf
 

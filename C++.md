@@ -498,3 +498,51 @@ private:
 1. <font color="red">单例的析构函数中绝对不要调其他单例，析构函数中不能确定单例是否已被析构，有造成coredump的可能，即使使用的是Meyers's的单例貌似也不能保证所有情况析构顺序都是一样的</font>
 2. <font color="red">C++中单例模式尽量少用，不得不用时也要保证在Stop函数中停止所有功能，不要在单例的析构函数中访问其他类的成员，因为单例作为全局变量析构是在main函数后去析构的，析构时机不确定。</font>
 
+## Effective C++
+
+### 类型推导
+
+* 形参为引用或指针，在模板的类型推导中会忽略引用和指针
+
+```c++
+template<typename T>
+void f(T& param);       // param is a reference
+
+int x = 27;             // x is an int
+const int cx = x;       // cx is a const int
+const int& rx = x;      // rx is a reference to x as a const int
+
+f(x);                   // T is int, param's type is int&
+f(cx);                  // T is const int, param's type is const int&
+f(rx);                  // T is const int, param's type is const int&. 可以看到cx和rx推导出的T均为const int
+
+template<typename T>
+void f(T* param);        // param is now a pointer
+
+int x = 27;              // as before
+const int *px = &x;      // px is a ptr to x as a const int
+
+f(&x);                   // T is int, param's type is int*
+f(px);                   // T is const int, param's type is const int*。 指针情况与引用一致
+
+```
+
+* 形参（parameter）为universal reference，推导规则会发生变化。实参数分为左值和右值两种情况，左值则参数和T都推导为左值引用，右值则为正常推导
+
+  ```c++
+  template<typename T>
+  void f(T&& param);       // param is now a universal reference
+  
+  int x = 27;              // as before
+  const int cx = x;        // as before
+  const int& rx = x;       // as before
+  
+  f(x);                    // x is lvalue, so T is int&, param's type is also int&
+  f(cx);                   // cx is lvalue, so T is const int&, param's type is also const int&
+  f(rx);                   // rx is lvalue, so T is const int&, param's type is also const int&
+  f(27);                   // 27 is rvalue, so T is int, param's type is therefore int&&
+  ```
+
+* 形参既不是引用也不是指针
+
+  原理可以类比函数参数的拷贝复制，推导会忽略const和引用。注意：如果实参为const int * const类型，那么形参会被推导为const int *，以为指针指向的是不可修改的数据。
