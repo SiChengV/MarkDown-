@@ -25,11 +25,11 @@ str = subprocess.getoutput(cmd)  # 接收字符串格式的命令，执行命令
 
 subprocess.run()   # 执行指定的命令，返回命令执行状态，其功能类似于os.system(cmd)，但是其会等待命令执行完。可使用shell调用
 
-p = subprocess.Popen("xxx", shell=True, stdout=subprocess.PIPE)    # 执行指定命令，异步调用，使用shell脚本来调用命令，输出重定向到PIPE中   重定向后需要使用p.stdout.close()来关闭iobuffer
+p = subprocess.Popen("xxx", shell=True, stdout=subprocess.PIPE)    # 执行指定命令，异步调用，使用shell脚本来调用命令，输出重定向到PIPE中   重定向后需要使用p.stdout.close()来关闭iobuffer，如果使用stdout=PIPE重定向到管道时，输出太多时可能会阻塞程序运行
 p.terminate()
-p.wait()     # 终止命令时需要等待命令成功终止
+p.wait()     # 终止命令时需要等待命令成功终止，
 
-# 获取执行结果，需使用stdout=subprocess.PIPE重定向输出
+# 获取执行结果，需使用stdout=subprocess.PIPE重定向输出，可替代p.wait()分防止PIPE阻塞
 out, err = p.communicate()
 print(out.decode())   # 执行输出内容
 ```
@@ -44,7 +44,7 @@ import re
 findall(string[, pos[, endpos]])  # pos和endpos为可选的指定字符串搜索起始位置和结束位置
 result = re.findall("[\W]+", text)  # 使用正则表达式匹配text内的字符串
 
-#正则表达式中用()包含的已匹配部分可以用gourp(x)函数取出 x从1开始为第一个括号里的匹配内容
+#正则表达式中用()包含的已匹配部分可以用group(x)函数取出 x从1开始为第一个括号里的匹配内容
 ```
 
 * compile函数
@@ -62,7 +62,7 @@ python内建测试框架
 
 `import unittest` 引入unittest
 
-运行单个测试用例：`python -m unittest -v test.LogTest.test_ChangeLogLevel`   -v 后为文件名.类名.成员函数名
+运行单个测试用例：`python -m unittest -v log_dt.LogTest.test_ChangeLogLevel`   -v 后为文件名.类名.成员函数名
 
 unittest中最核心的四个概念是：test case，test suite，test runner，test fixture
 

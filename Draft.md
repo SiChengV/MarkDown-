@@ -20,3 +20,7 @@ strip到底做了啥？为啥静态库就不能strip？静态库加不加-g有�
 
 
 
+
+
+https://www.xiaolincoding.com/os/8_network_system/selete_poll_epoll.html#%E8%BE%B9%E7%BC%98%E8%A7%A6%E5%8F%91%E5%92%8C%E6%B0%B4%E5%B9%B3%E8%A7%A6%E5%8F%91   小林coding
+

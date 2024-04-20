@@ -6,6 +6,125 @@
 
 ## Linux知识
 
+### CMake
+
+cmake中的系统指令支持大小、小写和大小写混合
+
+```cmake
+cmake_minimum_required (VERSION 2.6)
+# 本CMakeLists.txt的project名称
+# 会自动创建两个变量，PROJECT_SOURCE_DIR 和 PROJECT_NAME
+# ${PROJECT_SOURCE_DIR}：本CMakeLists.txt所在的文件夹路径
+# ${PROJECT_NAME}：本CMakeLists.txt的project名称
+project(xxx)
+
+# 给文件名/路径名或其他字符串起别名，用${变量}获取变量内容
+set(变量 文件名/路径/...)
+
+# 添加编译宏,代码中可以读到这些宏 可以使用命令关闭或开启：cmake -Dxxxxx=on/off
+add_definitions(-Dxxx)
+add_compile_definitions(xxx)   # 这种方法不用加-D
+
+#设置编译选项
+  #单独设置C++或C的编译选项
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+  # 针对所有编译器设置编译选项
+add_compile_options(-std=c++17)
+
+# 打印消息
+message(消息)
+
+# 添加一个子文件夹的CMakeLists.txt并构建
+add_subdirectory(子文件夹名称)
+
+# 将.cpp/.c/.cc文件生成.a静/动态库
+# 注意，库文件名称通常为libxxx.so，在这里只要写xxx即可
+add_library(库文件名称 STATIC 文件)
+add_library(库文件名称 SHARED 文件)
+
+# 将.cpp/.c/.cc文件生成可执行文件,即编译可执行文件
+add_executable(可执行文件名称 文件)
+
+# 将指定目录添加到编译器的头文件搜索路径之下，指定的目录被解释成当前源码路径的相对路径。非递归添加，仅那一级目录
+include_directories(路径)
+
+# 即可将指定目录设为头文件搜索路径，等价于系统路径，甚至可用<>引用头文件。更常用的是在库中将目录设为.  这样此库被其他cmakelists target_link_libraries时会继承库的搜索路径。public改为private则不会将搜索路径传播出去
+target_include_directories(a.out PUBLIC 目录)
+
+ # 指定链接库文件路径
+target_link_directories(a.out PUBLIC 目录)
+
+# 规定.so/.a库文件路径 相当于编译的时候加了-L xxx
+link_directories(路径)
+
+# 对add_library或add_executable生成的文件进行链接操作
+# 注意，库文件名称通常为libxxx.so，在这里只要写xxx即可
+target_link_libraries(编译工程名 链接的库文件名称)
+
+# 搜索当前路径下的所有源代码文件并将列表存储到 xxx变量中
+aux_source_directory(. xxx)
+
+# 打印信息 
+# (无) = 重要消息；
+# STATUS = 非重要消息；
+# WARNING = CMake 警告, 会继续执行；
+# AUTHOR_WARNING = CMake 警告 (dev), 会继续执行；
+# SEND_ERROR = CMake 错误, 继续执行，但是会跳过生成的步骤；
+# FATAL_ERROR = CMake 错误, 终止所有处理过程；
+message(STATUS "xxxx")
+
+# 引用系统中预安装的第三方库
+find_package(fmt REQUIRED)
+target_link_libraries(myexec PUBLIC fmt::fmt)
+# 指定要用其中的哪几个库
+find_package(TBB REQUIRED COMPONENTS tbb tbbmalloc REQUIRED)
+target_link_libraries(myexec PUBLIC TBB::tbb TBB::tbbmalloc)
+
+```
+
+`set(CMAKE_VERBOSE_MAKEFILE TRUE) ` 可以开启cmake的调测信息
+
+<font size="5">**.cmake文件**</font>
+
+相当于cmake的模块函数文件
+
+```cmake
+${CMAKE_CURRENT_LIST_DIR}  # 可获得该cmake文件的当前绝对路径
+```
+
+
+
+<font size="5">**编译流程：**</font>
+
+```shell
+mkdir build  # 为了将编译过程中生成的文件放到build路径下，不破坏源码的目录结构  
+cd build
+cmake ..  # 前三步可以简化成 cmake -B build
+make
+```
+
+<font size="5">**list命令**</font>
+
+对一个list进行多种操作
+
+```cmake
+list(LENGTH <list><output variable>)          # 返回list的长度
+list(REMOVE_ITEM <list> <value>[<value> ...])   # 从list中删除某个element
+list(APPEND <list><element> [<element> ...])    # 添加新element到list中
+```
+
+<font size="5">**file命令**</font>
+
+收集文件
+
+```cmake
+file(GLOB_RECURSE <variable> 
+     [<globbing-expressions>...])    # 递归收集globbing-expressins下的所有文件
+```
+
+
+
 ### PATCH补丁命令
 
 制作补丁：`diff text1.txt text2.txt > text.patch`  ，patch是基于diff出来的数据去打补丁的。
@@ -65,9 +184,11 @@ cgroups通过VFS吧相关功能暴露给用户
   :tabnew filname 多标签
   gt：切换到下一个标签
   gT：切换到上一个标签
-  
+  :jumps  查看jumplist
+  插入模式键入Ctrl-o，则回到命令模式，执行一条命令后重新进入编辑模式
   :%s/old/new/g 可以替换 old 为 new（%表示从第一行到最后一行）（g：此行中的全部匹配项）（不加/g：此行中第一个匹配项）
   :#,#s/old/new/g ：在两行内替换所有的字符串 old 为新的字符串 new
+  在命令行模式中粘贴y复制的内容(粘贴0号寄存器中的内容)：/ + ctrl + r + 0
   
   h、j、k、l：右、下、左、上。H：屏幕第一个字符，L：屏幕最后一行的第一个字符
   w、b、e：跳到下个单词词首、跳到本单词或上个单词词首、跳到本单词或下个单词词尾
@@ -183,7 +304,17 @@ cgroups通过VFS吧相关功能暴露给用户
 
 \d元字符：匹配所有数字
 
-### GDB
+### GDB指南
+
+* 编译和gdb运行二进制文件环境不一致导致无法查看源文件 **set substitute-path**
+
+  当带符号表的二进制文件编译出来放到另一个地方跑的时候，用list列出源文件的时候会提示找不到源文件，可以看到提示的路径还是旧的、编译的是文件路径，而在运行环境上想看源文件需把源文件拷到运行环境，并使用`set substitute-path from_path to_path`将gdb搜索的目录替换，比如 list显示的源码是  /home/aaa/1.cpp，那么设置了 `set substitute-path /home/aaa/  /home/bbb/`，之后，即使你的源文件1.cpp 放在 /home/bbb下面也是可以找到的了。因为gdb帮你做了字符串替换。
+
+调试正在运行的程序：gdb {program} {pid}，或在gdb里执行attach {pid}命令
+
+**gdb命令**
+
+* `p $_siginfo` 打印接收到的信号的详细信息，例如：si_code表示信号产生的方式，si_pid表示发送信号的进程  相关信息可以看siginfo.h源码
 
 查看信息 info，缩写 i
 
@@ -246,7 +377,7 @@ cgroups通过VFS吧相关功能暴露给用户
 
   `x /12tb arr`：表示以arr为首地址，查看12个字节，以二进制显示
 
-  * t 按二进制格式显示变量。
+  * t 按二进制格式显示变量。c 按字符显示变量
   * b 表示单字节
 
 * `bt/backtrace`和`frame`
@@ -266,7 +397,12 @@ cgroups通过VFS吧相关功能暴露给用户
 
 * shell：跳到shell执行shell命令，再键入exit退回到gdb
 
-Perf性能分析工具
+### GCC/G++编译
+
+<font size="5">**编译参数**</font>
+
+* `-Wl,--no-as-needed xxxx`   强制链接动态库
+* `-Wl,--as-needed`      忽略链接时没有用到的静态库，链接器默认使用此参数
 
 ### perf
 
@@ -378,7 +514,7 @@ Perf工作模式分为Counting Mode和Sampling Mode，Counting Mode将会精确�
 
 AF_UNIX：代表本地连接
 
-## Linux系统编程
+## Linux C++ 系统编程
 
 ##### 磁盘刷新、同步（sync、fsync、fdatasync）
 
@@ -530,6 +666,15 @@ AF_UNIX：代表本地连接
             }
         }
     }
+```
+
+##### 线程
+
+linux下获取线程号的两种方式：
+
+```c++
+syscall(SYS_gettid);    // 返回的是linux系统中该线程所属的标识号
+pthread_self();      // 返回的是pthread库中标记的线程号，与linux中的不一致，和pthread_create获取的一致。
 ```
 
 
@@ -751,6 +896,8 @@ AF_UNIX：代表本地连接
   
   `dd if=/dev/zero of=test.txt count=10 bs=1M`  创建大小为10M的文件
   
+  `dd if=/dev/urandom bs=1 count=64`     需要创建大文件用来输入的话可从/dev/urandom文件方便的读取随机数据
+  
 * **-exec / -ok / xargs**
 
   `find ./ -maxdepth 1 -type f -exec rm -r {} \;`：将前面find指令的结果传给后面的{}然后执行后面的指令。将前面的命令分段依次传给后面的命令，传一个执行一次命令。
@@ -760,6 +907,11 @@ AF_UNIX：代表本地连接
   `find ./ -maxdepth 1 -type f | xargs  rm -r `：将前面find指令的结果传给后面，然后执行后面的指令,当结果集过大时会分段 ，因此比-exec优越，但xargs命令对传过来的结果集默认以空格分割，因此如果一个文件名中有空格，如：abc dd，那么xargs会把这一个文件看成两个文件：abc和dd，解决办法是两个命令都加上-print0：以null分割结果集。xargs将前面的内容作为参数传给后续命令执行，而不是文本内容。将前面命令一股脑的甩给后面的命令作为参数，只执行一次后面的命令。
   
 * `crontab -e` 编辑定时任务
+
+#### 查看二进制文件
+
+* `readelf -s xxx` 读取二进制文件符号（如果符号太长会被截断）
+* `objdump -T xxx` 显示二进制文件符号
 
 ## linux杂项知识
 
