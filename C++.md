@@ -357,6 +357,15 @@ nanoseconds：纳秒。microseconds：微秒。
 
 eg：`std::atomic<int> globalVariable = 0;`  即可将globalVariable变成一个原子的int变量
 
+```c++
+atomic<bool> value{false};
+
+value.exchange(true)   // 原子地获取value变量的值并返回，后将变量的值赋为true
+
+```
+
+
+
 ### Bitset
 
 位运算操作使用
