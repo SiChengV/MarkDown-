@@ -463,7 +463,15 @@ std::unique_lock<std::shared_timed_mutex> lockGuard(dirMonitorMutex_);  // 使�
 std::shared_lock<std::shared_timed_mutex> lockGuard(dirMonitorMutex_);   // 使用shared_lock来对读操作进行加锁
 ```
 
+### 算法库
 
+<font size="5">std::reduce</font>
+
+对一个迭代范围内的值进行累计计算，例如累加，累乘...
+
+<font size="5">std::transform</font>
+
+对一个迭代范围内的每个值进行某种运算
 
 ## 设计模式
 

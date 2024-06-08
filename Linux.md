@@ -12,6 +12,7 @@ cmake中的系统指令支持大小、小写和大小写混合
 
 ```cmake
 cmake_minimum_required (VERSION 2.6)
+
 # 本CMakeLists.txt的project名称
 # 会自动创建两个变量，PROJECT_SOURCE_DIR 和 PROJECT_NAME
 # ${PROJECT_SOURCE_DIR}：本CMakeLists.txt所在的文件夹路径
@@ -31,6 +32,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
   # 针对所有编译器设置编译选项
 add_compile_options(-std=c++17)
+
+#设置编译标准为c++17
+set(CMAKE_CXX_STANDARD 17)
 
 # 打印消息
 message(消息)
