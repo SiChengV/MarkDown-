@@ -88,6 +88,13 @@ sizof(sSampleStruct)    //  8字节
 
 #### 模板
 
+语法： `template<class t>` 或`template<typename T>`
+
+优点：编译器可根据每个实例化出来的函数做单独优化
+缺点：每个实例化出来的函数均需要编译，会加长编译时间
+
+在函数中调用`__PRETTY_FUNCTION__`可以打印出模板的参数
+
 限制模板特化的类型，不在可选范围内则报错
 
 ```c++
@@ -142,6 +149,15 @@ int main(){
 Widget w1 = w2   调用拷贝构造函数
 
 w1 = w2 调用赋值运算符函数
+
+构造函数使用explicit修饰可防止隐式转换
+
+<font size="4">**移动构造函数**</font>
+
+以下情况编译器会默认调用移动：
+
+* return v2    // v2做为返回值，返回值优化
+* v1 = std::vector\<int\>(200)   // 就地构造v2
 
 #### c++关键字
 
@@ -372,7 +388,7 @@ value.exchange(true)   // 原子地获取value变量的值并返回，后将变�
 
 参考资料：https://www.cnblogs.com/rabbithu/p/bitset.html
 
-### 新特性string_view
+### string_view
 
 相当于一个只读的string，注意不可用string来初始化，不可对观察的对象进行修改操作，它不管理内存，只保存指针和长度，所以效率高
 
@@ -397,7 +413,7 @@ string&不能代替string_view的原因：
 
 2. string_view允许不拷贝的情况下使用string的子串
 
-### 新特性span
+### span
 
 在内存上连续对象的观察者，类似于string_view，可以解决数组指针退化，和越界访问的问题
 
@@ -425,6 +441,22 @@ return 0;
 ```
 
 auto根据等号右边的初始值自动推导类型，而decltype根据括号中的表达式推导类型，和等号右边无关，因此可以用decltype声明一个变量而auto不行。decltype不会真的去执行推导的表达式。
+
+### optional
+
+可以使用has_value成员函数判断该值是否有效，这样在失败场景下就不需要考虑返回值写什么了
+
+```c++
+std::optional<float> ret;
+ret = std::nullopt;
+if (ret.has_value())
+	std::cout << "成功！结果为：" << ret.value() << std::endl;
+else 
+    // value_or() 如果有有效值则返回该值，否则返回参数中的值
+    std::cout << "失败！结果为：" << ret.value_or(1.1315) << std::endl; 
+```
+
+
 
 ### random库
 
@@ -476,7 +508,7 @@ std::shared_lock<std::shared_timed_mutex> lockGuard(dirMonitorMutex_);   // 使�
 
 <font size="5">std::reduce</font>
 
-对一个迭代范围内的值进行累计计算，例如累加，累乘...
+对一个迭代范围内的值进行累计计算，例如累加，累乘... 和for_each的区别在于reduce将结果作为返回值返回.
 
 <font size="5">std::transform</font>
 
