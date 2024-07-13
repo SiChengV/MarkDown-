@@ -154,6 +154,14 @@ fflush将数据从用户缓冲区刷写到内核缓存区
 
 fsync将内核缓存区数据刷写到磁盘，同步等磁盘写入完毕后才返回
 
+### PROC系统目录
+
+/proc目录保存当前进程信息
+
+/proc/xxx/maps 文件保存进程当前使用内存地址布局
+
+/proc/xxx/smaps   查看内存资源使用情况
+
 ### CGROUPS
 
 > 参考资料：https://tech.meituan.com/2015/03/31/cgroups.html
@@ -707,6 +715,10 @@ pthread_self();      // 返回的是pthread库中标记的线程号，与linux�
 
 ## Linux常用命令
 
+* ifconfig
+  
+  添加虚拟网卡： `ifconfig eth0:1 192.168.10.6 up`
+  
 * `unrar x 文件名`：解压rar压缩的文件
   x为全路径解压，在指定解压路径时会把压缩前的路径一起解压出来
   e为无路径解压，即在指定解压路径时会把所有文件解压到指定路径，不保存原来的目录结构，即全部文件都堆在指定目录里

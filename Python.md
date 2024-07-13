@@ -29,7 +29,7 @@ p = subprocess.Popen("xxx", shell=True, stdout=subprocess.PIPE)    # 执行指�
 p.terminate()
 p.wait()     # 终止命令时需要等待命令成功终止，
 
-# 获取执行结果，需使用stdout=subprocess.PIPE重定向输出，可替代p.wait()分防止PIPE阻塞
+# 获取执行结果，需使用stdout=subprocess.PIPE重定向输出，可替代p.wait()防止PIPE阻塞
 out, err = p.communicate()
 print(out.decode())   # 执行输出内容
 ```
@@ -148,6 +148,12 @@ runner.run(suite)
 | [`assertRegex(s, r)`](https://docs.python.org/zh-cn/3/library/unittest.html#unittest.TestCase.assertRegex) | `r.search(s)`                                       | 3.1      |
 | [`assertNotRegex(s, r)`](https://docs.python.org/zh-cn/3/library/unittest.html#unittest.TestCase.assertNotRegex) | `not r.search(s)`                                   | 3.2      |
 | [`assertCountEqual(a, b)`](https://docs.python.org/zh-cn/3/library/unittest.html#unittest.TestCase.assertCountEqual) | *a* 和 *b* 具有同样数量的相同元素，无论其顺序如何。 | 3.2      |
+
+<font size="5">**自定义报错信息**</font>
+
+```python
+self.assertNotIn(a,b,msg='报错原因：xxxx')
+```
 
 <font size="5">**执行输出**</font>
 

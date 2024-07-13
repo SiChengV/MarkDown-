@@ -161,18 +161,18 @@ w1 = w2 调用赋值运算符函数
 
 #### c++关键字
 
-<font size=5>const</font>
+<font size=5>**const**</font>
 
 顶层const：int *const p1
 底层const：const int *p2
 
-<font size=5>thread_local</font>
+<font size=5>**thread_local**</font>
 
 thread_local和static类似：static为全局存储期，全局仅一个。thrad_local为线程存储期，即每个线程都会有一个
 
 thread_local 声明等价于 static thread_local
 
-#### numeric_limits
+<font size=5>**numeric_limits**</font>
 
 `#include <limits>`
 
@@ -181,6 +181,16 @@ thread_local 声明等价于 static thread_local
 ```c++
 cout << numeric_limits<uint16_t>::max() << endl;   // out: 65535
 ```
+
+<font size=5>**extern**</font>
+
+1.**当变量还没定义时**，用来告诉编译器，这里**只声明这个变量，而不去定义它**。即告诉编译器，这个变量是“外部的”定义，不是这儿定义的，在这儿只是声明一下。
+
+2.**当变量已经定义了**，用在变量定义的前面，那么它的意思就是**告诉编译器，这个变量不仅仅在这一个.cpp文件中有效，它在“外部的”其他.cpp文件中也有效，从而定义了全局变量**。
+
+全局作用域中的非const变量，默认都是extern的
+
+
 
 #### 回调函数与std::function与std::bind
 
