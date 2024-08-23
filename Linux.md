@@ -85,6 +85,8 @@ target_link_libraries(myexec PUBLIC fmt::fmt)
 find_package(TBB REQUIRED COMPONENTS tbb tbbmalloc REQUIRED)
 target_link_libraries(myexec PUBLIC TBB::tbb TBB::tbbmalloc)
 
+#不打印编译告警
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 ```
 
 `set(CMAKE_VERBOSE_MAKEFILE TRUE) ` 可以开启cmake的调测信息
@@ -203,6 +205,8 @@ cgroups通过VFS吧相关功能暴露给用户
   gt：切换到下一个标签
   gT：切换到上一个标签
   :jumps  查看jumplist
+  mA  在当前位置打mark
+  使用 'A  可跳转到该mark位置 小写为当前文件，大小为不同文件全局标注
   插入模式键入Ctrl-o，则回到命令模式，执行一条命令后重新进入编辑模式
   :%s/old/new/g 可以替换 old 为 new（%表示从第一行到最后一行）（g：此行中的全部匹配项）（不加/g：此行中第一个匹配项）
   :#,#s/old/new/g ：在两行内替换所有的字符串 old 为新的字符串 new
@@ -565,6 +569,8 @@ AF_UNIX：代表本地连接
   fdatasync函数类似于fsync，但它只影响文件的数据部分。而除数据外，fsync还会同步更新文件的属性。
 
   fdatasync函数类似于fsync，但它只影响文件的数据部分。而除数据外，fsync还会同步更新文件的属性。
+  
+* fflush 把用户区的数据刷到内核区
 
 ##### epoll
 
@@ -945,6 +951,11 @@ pthread_self();      // 返回的是pthread库中标记的线程号，与linux�
   `find ./ -maxdepth 1 -type f | xargs  rm -r `：将前面find指令的结果传给后面，然后执行后面的指令,当结果集过大时会分段 ，因此比-exec优越，但xargs命令对传过来的结果集默认以空格分割，因此如果一个文件名中有空格，如：abc dd，那么xargs会把这一个文件看成两个文件：abc和dd，解决办法是两个命令都加上-print0：以null分割结果集。xargs将前面的内容作为参数传给后续命令执行，而不是文本内容。将前面命令一股脑的甩给后面的命令作为参数，只执行一次后面的命令。
   
 * `crontab -e` 编辑定时任务
+
+* `sysctl -a`  回显系统配置
+
+  * vm.dirty_expire_centisecs  代表已存在多久的系统脏页会刷回磁盘 单位 10ms
+  * vm.dirty_writeback_centisecs  表示系统周期刷写磁盘的时间  单位 10ms
 
 #### 查看二进制文件
 

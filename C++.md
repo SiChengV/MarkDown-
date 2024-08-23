@@ -335,8 +335,27 @@ Google的gflags开源库有类似的功能
   // first 起始源数据地址   count 拷贝字节数  result 拷贝目的地址   返回值 指向拷贝后的最后一个数据的后一个元素
   OutputIt copy_n( InputIt first, Size count, OutputIt result );
   ```
-
   
+* std::put_time
+
+  格式化时间为字符串（自定义格式）
+
+#### 基于范围的for循环遍历
+
+在基于范围的 `for` 循环中，不能安全地添加或删除容器中的元素。如果需要在遍历过程中修改容器的结构（添加或删除元素），应使用迭代器来控制遍历过程。这是因为直接在基于范围的 `for` 循环中对容器进行修改可能导致未定义行为。
+
+
+### istream
+
+* read
+
+  调用read成员函数读取到eof时，会**置failbit和eofbit位为1**，此时如果需要调用seekg时需特别注意，需要重置**failbit位**才能正常移动输入指针。
+
+* seekg
+
+  **failbit位为1**时会导致seekg**失败！！**
+
+
 
 ## 现代C++特性
 
