@@ -122,7 +122,9 @@ void Myfun(const T typeInfo)
   Derived *pDerived = dynamic_cast<Derived*>(pBase);
   ```
 
-  
+* reinterpret_cast  
+
+  指针强转
 
 #### 构造函数
 

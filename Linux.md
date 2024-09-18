@@ -807,6 +807,8 @@ pthread_self();      // 返回的是pthread库中标记的线程号，与linux�
 * 查看进程与文件的关系 `lsof`
 
   用lsof | grep 进程名可以看到进程使用了哪些文件
+  
+* 查看所有线程的调用栈： `pstack`
 
 
 * AWK使用
