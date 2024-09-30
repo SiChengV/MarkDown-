@@ -273,7 +273,7 @@ void test(A x, void (A::*pfun)(int), int y){   // 入参可填 &A::fun
 
 * new(std::nothrow) 在内存分配失败时会返回一个空指针，而不是触发std::bad_alloc，可以方便的进行检查
 
-* 指定区域分配内存
+* 指定区域分配内存 （placement new）
 
   使用已分配的内存区域，并不实际申请额外内存，eg：
 
@@ -464,7 +464,7 @@ enum memory_order {
 
 相当于一个只读的string，注意不可用string来初始化，不可对观察的对象进行修改操作，它不管理内存，只保存指针和长度，所以效率高
 
-注意string_view.data()返回的是原始字符串数组的指针，会打印完整的原始字符串，<font color="red">使用data函数时需特别小心</font>
+注意string_view.data()返回的是原始字符串数组的指针，会打印完整的原始字符串，<font color="red">使用data函数时需特别小心</font>，此外如果仅仅是声明了一个string_view，那么data返回的将是空指针。
 
 string&不能代替string_view的原因：
 
