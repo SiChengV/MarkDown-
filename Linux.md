@@ -156,13 +156,27 @@ fflush将数据从用户缓冲区刷写到内核缓存区
 
 fsync将内核缓存区数据刷写到磁盘，同步等磁盘写入完毕后才返回
 
-### 寄存器
+### 内存系统
+
+pmap可查看进程的详细内存映射
+
+#### 寄存器
 
 PC：程序计数器，代表下一条要执行的指令
 
 BP：基址指针寄存器，指向当前栈帧的基地址
 
 SP：堆栈指针寄存器，内容为当前栈帧的栈顶地址，常与BP搭配使用
+
+#### 内存分析/优化
+
+**VSS（Virtual Set Size）：**虚拟耗用内存大小，是进程可以访问的所有虚拟内存的总量，包括进程独自占用的物理内存、和其他进程共享的内存、分配但未使用的内存。可使用`ps -aux` 查看，VSZ列即VSS，或`top`的VIRT列。
+
+**RSS (Resident Set Size)**：驻留内存大小，是进程当前实际占用的物理内存大小，包括进程独自占用的物理内存、与其他进程共享的内存。可使用`ps -aux` 查看，RSS列即RSS，或`top`的RES列。
+
+**PSS(Proportional Set Size)：**比例驻留内存大小，包括检查独自占用的内存、比例分配合其他进程共享的内存（共享库内存会均分到各个共享进程）。可通过`/proc/{PID}/smaps_rollup`文件查看
+
+**USS (Unique Set Size)：**独立内存大小，指进程使用的 **唯一内存**，即该进程独占的内存区域，不与其他进程共享。可通过`/proc/{PID}/smaps_rollup`文件查看，计算方式为`Private_Clean + Private_Dirty`
 
 ### PROC系统目录
 
@@ -376,6 +390,7 @@ linux一般默认使用POSIX正则表达式引擎，分为基本正则表达式�
 
 * info proc mapping  查看进程地址映射信息
 * info locals  查看栈帧变量
+* info sharedlibrary 查看动态库信息
 * 查看寄存器：`i registers` ，查看所有寄存器 `i all-registers`
 
 常规
@@ -578,11 +593,42 @@ Perf工作模式分为Counting Mode和Sampling Mode，Counting Mode将会精确�
 
 查询系统socket缓存区大小：`cat /proc/sys/net/ipv4/tcp_rmem`。查询出来的三列分别为最小、默认、最大缓存区字节数。
 
-函数原型：`int socket(int domain, int type, int protocol);`
+#### socket函数
 
-#### domain参数
+```c++
+int socket(int domain, int type, int protocol);
+// domain参数: AF_UNIX：代表本地连接
+```
 
-AF_UNIX：代表本地连接
+#### bind函数
+
+bind将一个套接字与一个特定的地址和端口绑定
+
+```c++
+int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+// addr为需要绑定的地址信息，有 sockaddr、sockaddr_in、sockaddr_un三种类型
+// 其中 sockaddr为通用形式，一般不会直接使用，结构如下，一般在调用bind时会将下述两种类型转换为sockaddr来作为入参
+struct sockaddr {
+    sa_family_t sa_family;  // 地址族
+    char sa_data[14];       // 地址数据
+};
+
+// sockaddr_in结构用于IPv4网络通信，结构如下：
+struct sockaddr_in {
+    sa_family_t    sin_family;   // 地址族，必须是 AF_INET（IPv4）
+    in_port_t      sin_port;     // 端口号（使用网络字节序）
+    struct in_addr sin_addr;     // IPv4 地址
+    char           sin_zero[8];  // 填充，保持与 struct sockaddr 大小一致
+};
+
+// sockaddr_un结构用于Unix域套接字，即本机内通信
+struct sockaddr_un {
+    sa_family_t sun_family;  // 地址族，必须是 AF_UNIX
+    char        sun_path[108];  // 文件路径，如果以'\0'开头,则使用抽象命名空间，即不会在文件系统中城建实际文件
+};
+```
+
+
 
 ## Linux C++ 系统编程
 
@@ -976,6 +1022,8 @@ pthread_self();      // 返回的是pthread库中标记的线程号，与linux�
   
   `dd if=/dev/urandom bs=1 count=64`     需要创建大文件用来输入的话可从/dev/urandom文件方便的读取随机数据
   
+  `/dev/null` ，任何写入该文件的数据都会被丢弃且不会产生任何效果
+  
 * **-exec / -ok / xargs**
 
   `find ./ -maxdepth 1 -type f -exec rm -r {} \;`：将前面find指令的结果传给后面的{}然后执行后面的指令。将前面的命令分段依次传给后面的命令，传一个执行一次命令。
@@ -1007,6 +1055,8 @@ export LD_LIBRARY_PATH=自己的动态链接库路径:$LD_LIBRARY_PATH
 /etc/ld.so.conf文件内记录了要搜索库的路径，使用ldconfig会搜索这些路径，并将文件加载到ld.so.cache内
 
 去除export过的环境变量：`unset LD_LIBRARY_PATH`
+
+动态库强制链接：`export LD_PRELOAD=/xxx/libmyrand.so`
 
 ##### 系统默认编辑器修改
 

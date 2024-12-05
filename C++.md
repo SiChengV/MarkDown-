@@ -393,7 +393,7 @@ system_clock的计时单位是$10^{-7}$秒
         // 一秒准时退出
         break;
     }
-	std::this_thread::sleep_for(std::chrono::duration<long long, ratio<1,1000>>(1)); 休眠一毫秒
+	std::this_thread::sleep_for(std::chrono::milliseconds(50)); 休眠50毫秒
 ```
 
 nanoseconds：纳秒。microseconds：微秒。
@@ -576,6 +576,12 @@ std::unique_lock<std::shared_timed_mutex> lockGuard(dirMonitorMutex_);  // 使�
 std::shared_lock<std::shared_timed_mutex> lockGuard(dirMonitorMutex_);   // 使用shared_lock来对读操作进行加锁
 ```
 
+<font size=5>递归锁 std::recursive_mutex </font>
+
+它允许同一个线程多次锁定它，而不会引起死锁。
+
+
+
 ### 算法库
 
 <font size="5">std::reduce</font>
@@ -618,6 +624,7 @@ private:
 
 1. <font color="red">单例的析构函数中绝对不要调其他单例，析构函数中不能确定单例是否已被析构，有造成coredump的可能，即使使用的是Meyers's的单例貌似也不能保证所有情况析构顺序都是一样的</font>
 2. <font color="red">C++中单例模式尽量少用，不得不用时也要保证在Stop函数中停止所有功能，不要在单例的析构函数中访问其他类的成员，因为单例作为全局变量析构是在main函数后去析构的，析构时机不确定。</font>
+3. 如果希望单例尽可能晚析构，并且需要保证在进程退出过程中也能正常访问，是不是可以将inst改成共享智能指针？
 
 ## Effective C++
 
@@ -667,3 +674,7 @@ f(px);                   // T is const int, param's type is const int*。 指针
 * 形参既不是引用也不是指针
 
   原理可以类比函数参数的拷贝复制，推导会忽略const和引用。注意：如果实参为const int * const类型，那么形参会被推导为const int *，以为指针指向的是不可修改的数据。
+
+## 碰到过的问题
+
+* 访问空指针场景
