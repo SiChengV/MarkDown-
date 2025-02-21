@@ -6,99 +6,6 @@
 
 ## Linux知识
 
-### CMake
-
-cmake中的系统指令支持大小、小写和大小写混合
-
-```cmake
-cmake_minimum_required (VERSION 2.6)
-
-# 本CMakeLists.txt的project名称
-# 会自动创建两个变量，PROJECT_SOURCE_DIR 和 PROJECT_NAME
-# ${PROJECT_SOURCE_DIR}：本CMakeLists.txt所在的文件夹路径
-# ${PROJECT_NAME}：本CMakeLists.txt的project名称
-project(xxx)
-
-# 给文件名/路径名或其他字符串起别名，用${变量}获取变量内容
-set(变量 文件名/路径/...)
-
-# 添加编译宏,代码中可以读到这些宏 可以使用命令关闭或开启：cmake -Dxxxxx=on/off
-add_definitions(-Dxxx)
-add_compile_definitions(xxx)   # 这种方法不用加-D
-
-#设置编译选项
-  #单独设置C++或C的编译选项
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
-  # 针对所有编译器设置编译选项
-add_compile_options(-std=c++17)
-
-#设置编译标准为c++17
-set(CMAKE_CXX_STANDARD 17)
-
-# 打印消息
-message(消息)
-
-# 添加一个子文件夹的CMakeLists.txt并构建
-add_subdirectory(子文件夹名称)
-
-# 将.cpp/.c/.cc文件生成.a静/动态库
-# 注意，库文件名称通常为libxxx.so，在这里只要写xxx即可
-add_library(库文件名称 STATIC 文件)
-add_library(库文件名称 SHARED 文件)
-
-# 将.cpp/.c/.cc文件生成可执行文件,即编译可执行文件
-add_executable(可执行文件名称 文件)
-
-# 将指定目录添加到编译器的头文件搜索路径之下，指定的目录被解释成当前源码路径的相对路径。非递归添加，仅那一级目录
-include_directories(路径)
-
-# 即可将指定目录设为头文件搜索路径，等价于系统路径，甚至可用<>引用头文件。更常用的是在库中将目录设为.  这样此库被其他cmakelists target_link_libraries时会继承库的搜索路径。public改为private则不会将搜索路径传播出去
-target_include_directories(a.out PUBLIC 目录)
-
- # 指定链接库文件路径
-target_link_directories(a.out PUBLIC 目录)
-
-# 规定.so/.a库文件路径 相当于编译的时候加了-L xxx
-link_directories(路径)
-
-# 对add_library或add_executable生成的文件进行链接操作
-# 注意，库文件名称通常为libxxx.so，在这里只要写xxx即可
-target_link_libraries(编译工程名 链接的库文件名称)
-
-# 搜索当前路径下的所有源代码文件并将列表存储到 xxx变量中
-aux_source_directory(. xxx)
-
-# 打印信息 
-# (无) = 重要消息；
-# STATUS = 非重要消息；
-# WARNING = CMake 警告, 会继续执行；
-# AUTHOR_WARNING = CMake 警告 (dev), 会继续执行；
-# SEND_ERROR = CMake 错误, 继续执行，但是会跳过生成的步骤；
-# FATAL_ERROR = CMake 错误, 终止所有处理过程；
-message(STATUS "xxxx")
-
-# 引用系统中预安装的第三方库
-find_package(fmt REQUIRED)
-target_link_libraries(myexec PUBLIC fmt::fmt)
-# 指定要用其中的哪几个库
-find_package(TBB REQUIRED COMPONENTS tbb tbbmalloc REQUIRED)
-target_link_libraries(myexec PUBLIC TBB::tbb TBB::tbbmalloc)
-
-#不打印编译告警
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
-```
-
-`set(CMAKE_VERBOSE_MAKEFILE TRUE) ` 可以开启cmake的调测信息
-
-<font size="5">**.cmake文件**</font>
-
-相当于cmake的模块函数文件
-
-```cmake
-${CMAKE_CURRENT_LIST_DIR}  # 可获得该cmake文件的当前绝对路径
-```
-
 
 
 <font size="5">**编译流程：**</font>
@@ -150,11 +57,17 @@ file(GLOB_RECURSE <variable>
 * `-p0` 代表保存原始目录，不跳过任何目录
 * `-R`  补丁回退，相当于text2.txt复原到text1.txt
 
-### 磁盘IO
+### 磁盘
+
+<font size="5">**磁盘IO**</font>
 
 fflush将数据从用户缓冲区刷写到内核缓存区
 
 fsync将内核缓存区数据刷写到磁盘，同步等磁盘写入完毕后才返回
+
+truncate：快速创建大文件`truncate -s 10G test2`，空洞文件，文件的部分内容并不实际存在于硬盘，使用du命令查看文件大小为0
+
+fallocate：为文件预分配物理空间`fallocate -l 10G test3`，与truncate不同的是插件出来的文件实际占用了空间
 
 ### 内存系统
 
@@ -486,6 +399,100 @@ linux一般默认使用POSIX正则表达式引擎，分为基本正则表达式�
 * `-Wl,--as-needed`      忽略链接时没有用到的静态库，链接器默认使用此参数
 * `tui enable`或者`layout src`可以打开源代码的UI界面辅助查看，`layout asm`将代码以汇编的形式呈现
 * gdb脚本：`save breakpoints xxx`保存当前断点到脚本中，脚本可以通过`source xxx`读取，读取后将顺序执行脚本中的命令
+* `--allow-shlib-undefined`，告诉链接器允许动态库中存在未定义的符号。它的作用是允许你链接一个共享库，即使其中某些符号在编译时没有被完全解析。
+
+### CMake
+
+cmake中的系统指令支持大小、小写和大小写混合
+
+```cmake
+cmake_minimum_required (VERSION 2.6)
+
+# 本CMakeLists.txt的project名称
+# 会自动创建两个变量，PROJECT_SOURCE_DIR 和 PROJECT_NAME
+# ${PROJECT_SOURCE_DIR}：本CMakeLists.txt所在的文件夹路径
+# ${PROJECT_NAME}：本CMakeLists.txt的project名称
+project(xxx)
+
+# 给文件名/路径名或其他字符串起别名，用${变量}获取变量内容
+set(变量 文件名/路径/...)
+
+# 添加编译宏,代码中可以读到这些宏 可以使用命令关闭或开启：cmake -Dxxxxx=on/off
+add_definitions(-Dxxx)
+add_compile_definitions(xxx)   # 这种方法不用加-D
+
+#设置编译选项
+  #单独设置C++或C的编译选项
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+  # 针对所有编译器设置编译选项
+add_compile_options(-std=c++17)
+
+#设置编译标准为c++17
+set(CMAKE_CXX_STANDARD 17)
+
+# 打印消息
+message(消息)
+
+# 添加一个子文件夹的CMakeLists.txt并构建
+add_subdirectory(子文件夹名称)
+
+# 将.cpp/.c/.cc文件生成.a静/动态库
+# 注意，库文件名称通常为libxxx.so，在这里只要写xxx即可
+add_library(库文件名称 STATIC 文件)
+add_library(库文件名称 SHARED 文件)
+
+# 将.cpp/.c/.cc文件生成可执行文件,即编译可执行文件
+add_executable(可执行文件名称 文件)
+
+# 将指定目录添加到编译器的头文件搜索路径之下，指定的目录被解释成当前源码路径的相对路径。非递归添加，仅那一级目录
+include_directories(路径)
+
+# 即可将指定目录设为头文件搜索路径，等价于系统路径，甚至可用<>引用头文件。更常用的是在库中将目录设为.  这样此库被其他cmakelists target_link_libraries时会继承库的搜索路径。public改为private则不会将搜索路径传播出去
+target_include_directories(a.out PUBLIC 目录)
+
+ # 指定链接库文件路径
+target_link_directories(a.out PUBLIC 目录)
+
+# 规定.so/.a库文件路径 相当于编译的时候加了-L xxx
+link_directories(路径)
+
+# 对add_library或add_executable生成的文件进行链接操作
+# 注意，库文件名称通常为libxxx.so，在这里只要写xxx即可
+target_link_libraries(编译工程名 链接的库文件名称)
+
+# 搜索当前路径下的所有源代码文件并将列表存储到 xxx变量中
+aux_source_directory(. xxx)
+
+# 打印信息 
+# (无) = 重要消息；
+# STATUS = 非重要消息；
+# WARNING = CMake 警告, 会继续执行；
+# AUTHOR_WARNING = CMake 警告 (dev), 会继续执行；
+# SEND_ERROR = CMake 错误, 继续执行，但是会跳过生成的步骤；
+# FATAL_ERROR = CMake 错误, 终止所有处理过程；
+message(STATUS "xxxx")
+
+# 引用系统中预安装的第三方库
+find_package(fmt REQUIRED)
+target_link_libraries(myexec PUBLIC fmt::fmt)
+# 指定要用其中的哪几个库
+find_package(TBB REQUIRED COMPONENTS tbb tbbmalloc REQUIRED)
+target_link_libraries(myexec PUBLIC TBB::tbb TBB::tbbmalloc)
+
+#不打印编译告警
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+```
+
+`set(CMAKE_VERBOSE_MAKEFILE TRUE) ` 可以开启cmake的调测信息
+
+<font size="5">**.cmake文件**</font>
+
+相当于cmake的模块函数文件
+
+```cmake
+${CMAKE_CURRENT_LIST_DIR}  # 可获得该cmake文件的当前绝对路径
+```
 
 ## Perf性能分析工具
 
@@ -1091,3 +1098,10 @@ export LD_LIBRARY_PATH=自己的动态链接库路径:$LD_LIBRARY_PATH
 `ssh-keygen` 一路回车，生成秘钥对
 
 将公钥放到机器的~/.ssh/authorized_keys文件下
+
+## 程序调试
+
+`export LD_DEBUG="XXX"`
+
+执行程序时打印ld链接器的debug信息
+

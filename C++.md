@@ -34,6 +34,16 @@ while (!stop_waiting()) {
 
 
 
+#### 浮点数判等
+
+浮点数由于机器码记录精度的原因不能直接进行判等，可使用以下判等方式：
+
+`(std::fabs(f1) - std::fabs(f2)) < std::numeric_limits<double>::epsilon`
+
+代表f1和f2的差值小于double可检测的最小差值即判断为相等
+
+
+
 #### 命名空间
 
 ```c++
@@ -357,6 +367,10 @@ Google的gflags开源库有类似的功能
 
   **failbit位为1**时会导致seekg**失败！！**
 
+#### std::thread
+
+线程创建后，如果进程在退出时未join创建的线程，会导致coredump
+
 
 
 ## 现代C++特性
@@ -386,10 +400,10 @@ Google的gflags开源库有类似的功能
 system_clock的计时单位是$10^{-7}$秒
 
 ```c++
-	chrono::system_clock::time_point begin = chrono::system_clock::now();    
+	std::chrono::system_clock::time_point begin = std::chrono::system_clock::now();    
     	your code here....
-    chrono::system_clock::time_point end = chrono::system_clock::now();
-    if(chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() < 1000){
+    std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
+    if(std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() < 1000){
         // 一秒准时退出
         break;
     }

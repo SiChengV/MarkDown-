@@ -27,3 +27,13 @@ https://www.xiaolincoding.com/os/8_network_system/selete_poll_epoll.html#%E8%BE%
 
 
 https://wizardforcel.gitbooks.io/100-gdb-tips/content/print-source-lines.html   100个dbg小技巧
+
+
+
+<<C++设计新思维>>中的凤凰单例
+
+
+
+
+
+https://juejin.cn/post/7469390430532403226   本地部署deepseek大模型教程
