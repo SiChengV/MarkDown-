@@ -34,6 +34,16 @@ while (!stop_waiting()) {
 
 
 
+#### 浮点数判等
+
+浮点数由于机器码记录精度的原因不能直接进行判等，可使用以下判等方式：
+
+`(std::fabs(f1) - std::fabs(f2)) < std::numeric_limits<double>::epsilon`
+
+代表f1和f2的差值小于double可检测的最小差值即判断为相等
+
+
+
 #### 命名空间
 
 ```c++
@@ -122,7 +132,9 @@ void Myfun(const T typeInfo)
   Derived *pDerived = dynamic_cast<Derived*>(pBase);
   ```
 
-  
+* reinterpret_cast  
+
+  指针强转
 
 #### 构造函数
 
@@ -271,7 +283,7 @@ void test(A x, void (A::*pfun)(int), int y){   // 入参可填 &A::fun
 
 * new(std::nothrow) 在内存分配失败时会返回一个空指针，而不是触发std::bad_alloc，可以方便的进行检查
 
-* 指定区域分配内存
+* 指定区域分配内存 （placement new）
 
   使用已分配的内存区域，并不实际申请额外内存，eg：
 
@@ -355,6 +367,10 @@ Google的gflags开源库有类似的功能
 
   **failbit位为1**时会导致seekg**失败！！**
 
+#### std::thread
+
+线程创建后，如果进程在退出时未join创建的线程，会导致coredump
+
 
 
 ## 现代C++特性
@@ -384,14 +400,14 @@ Google的gflags开源库有类似的功能
 system_clock的计时单位是$10^{-7}$秒
 
 ```c++
-	chrono::system_clock::time_point begin = chrono::system_clock::now();    
+	std::chrono::system_clock::time_point begin = std::chrono::system_clock::now();    
     	your code here....
-    chrono::system_clock::time_point end = chrono::system_clock::now();
-    if(chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() < 1000){
+    std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
+    if(std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() < 1000){
         // 一秒准时退出
         break;
     }
-	std::this_thread::sleep_for(std::chrono::duration<long long, ratio<1,1000>>(1)); 休眠一毫秒
+	std::this_thread::sleep_for(std::chrono::milliseconds(50)); 休眠50毫秒
 ```
 
 nanoseconds：纳秒。microseconds：微秒。
@@ -462,7 +478,7 @@ enum memory_order {
 
 相当于一个只读的string，注意不可用string来初始化，不可对观察的对象进行修改操作，它不管理内存，只保存指针和长度，所以效率高
 
-注意string_view.data()返回的是原始字符串数组的指针，会打印完整的原始字符串，<font color="red">使用data函数时需特别小心</font>
+注意string_view.data()返回的是原始字符串数组的指针，会打印完整的原始字符串，<font color="red">使用data函数时需特别小心</font>，此外如果仅仅是声明了一个string_view，那么data返回的将是空指针。
 
 string&不能代替string_view的原因：
 
@@ -574,6 +590,12 @@ std::unique_lock<std::shared_timed_mutex> lockGuard(dirMonitorMutex_);  // 使�
 std::shared_lock<std::shared_timed_mutex> lockGuard(dirMonitorMutex_);   // 使用shared_lock来对读操作进行加锁
 ```
 
+<font size=5>递归锁 std::recursive_mutex </font>
+
+它允许同一个线程多次锁定它，而不会引起死锁。
+
+
+
 ### 算法库
 
 <font size="5">std::reduce</font>
@@ -616,6 +638,7 @@ private:
 
 1. <font color="red">单例的析构函数中绝对不要调其他单例，析构函数中不能确定单例是否已被析构，有造成coredump的可能，即使使用的是Meyers's的单例貌似也不能保证所有情况析构顺序都是一样的</font>
 2. <font color="red">C++中单例模式尽量少用，不得不用时也要保证在Stop函数中停止所有功能，不要在单例的析构函数中访问其他类的成员，因为单例作为全局变量析构是在main函数后去析构的，析构时机不确定。</font>
+3. 如果希望单例尽可能晚析构，并且需要保证在进程退出过程中也能正常访问，是不是可以将inst改成共享智能指针？
 
 ## Effective C++
 
@@ -665,3 +688,7 @@ f(px);                   // T is const int, param's type is const int*。 指针
 * 形参既不是引用也不是指针
 
   原理可以类比函数参数的拷贝复制，推导会忽略const和引用。注意：如果实参为const int * const类型，那么形参会被推导为const int *，以为指针指向的是不可修改的数据。
+
+## 碰到过的问题
+
+* 访问空指针场景
