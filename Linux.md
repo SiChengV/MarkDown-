@@ -377,6 +377,7 @@ linux一般默认使用POSIX正则表达式引擎，分为基本正则表达式�
 * info proc mapping  查看进程地址映射信息
 * info locals  查看栈帧变量
 * 查看寄存器：`i registers` ，查看所有寄存器 `i all-registers`
+* info sharedlibrary：查看链接动态库概况
 
 常规
 
