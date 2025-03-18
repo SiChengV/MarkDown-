@@ -135,6 +135,8 @@ void Myfun(const T typeInfo)
 * reinterpret_cast  
 
   指针强转
+  
+* const_cast 去除const修饰
 
 #### 构造函数
 
@@ -371,6 +373,20 @@ Google的gflags开源库有类似的功能
 
 线程创建后，如果进程在退出时未join创建的线程，会导致coredump
 
+#### 枚举类
+
+可通过std::underlying_type_t获取枚举类的基础数据类型
+
+```c++
+enum class A : uin8_t {
+    xxx
+}
+cout << static_cast<int>(std::numeric_limits<std::underlying_type_t<SharedMemType>>::max()) << endl;  // 输出255
+
+```
+
+
+
 
 
 ## 现代C++特性
@@ -378,6 +394,25 @@ Google的gflags开源库有类似的功能
 ### std::error_code
 
 由两部分组成，errorCode枚举类，以及一个继承自std::error_category的类,此类包含了错误说明
+
+### regex库
+
+```c++
+std::string str {"CTX:LEVEL"}
+std::regex pattern {"\\w+:(\\w)"};    	// 创建一个正则表达式匹配规则
+std::smatch ret;                     	// 保存匹配结果
+
+// regex_search仅判断是否部分匹配
+if (std::regex_search(str, ret, pattern)) {   // 匹配成功返回true
+    std::cout << "正则表达式匹配的字符串：" << ret[0] << " ()中匹配到的字符串：" << ret[1] << std::endl;
+}
+
+// regex_march对整条字符串进行 匹配，不符合则返回false
+```
+
+
+
+
 
 ### std::chrono库
 
@@ -400,9 +435,9 @@ Google的gflags开源库有类似的功能
 system_clock的计时单位是$10^{-7}$秒
 
 ```c++
-	std::chrono::system_clock::time_point begin = std::chrono::system_clock::now();    
+	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();    // 测性能时使用steady_clock，结果更精确，system_clock无法精确到纳秒
     	your code here....
-    std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     if(std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() < 1000){
         // 一秒准时退出
         break;
@@ -411,6 +446,18 @@ system_clock的计时单位是$10^{-7}$秒
 ```
 
 nanoseconds：纳秒。microseconds：微秒。
+
+直接判断两个time_point之间的间隔时间
+
+```c++
+std::chrono::steady_clock::time_point begin {std::chrono::steady_clock::now()};
+std::chrono::steady_clock::time_point end {std::chrono::steady_clock::now()};
+if ((end - begin) > std::chrono::miliseconds(30)) {
+    // end和begin相差时间大于30ms
+}
+```
+
+
 
 ### Atomic
 
