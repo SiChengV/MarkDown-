@@ -121,6 +121,13 @@ void Myfun(const T typeInfo)
 
 #### 强制类型转换
 
+* static_cast
+
+  常用于
+
+  1. 基类及派生类之间的指针转换
+2. 基础数据类型之间的转换
+
 * dynamic_cast
 
   用于基类到派生类的强制转换（例如实现基类指针调用同名子类普通函数可使用此方法）
@@ -134,7 +141,9 @@ void Myfun(const T typeInfo)
 
 * reinterpret_cast  
 
-  指针强转
+  通常用于不同类型指针之间进行低级别转换，如`void*`到`int*`。不进行类型检查，较危险
+  
+* const_cast 去除const修饰
 
 #### 构造函数
 
@@ -371,6 +380,20 @@ Google的gflags开源库有类似的功能
 
 线程创建后，如果进程在退出时未join创建的线程，会导致coredump
 
+#### 枚举类
+
+可通过std::underlying_type_t获取枚举类的基础数据类型
+
+```c++
+enum class A : uin8_t {
+    xxx
+}
+cout << static_cast<int>(std::numeric_limits<std::underlying_type_t<SharedMemType>>::max()) << endl;  // 输出255
+
+```
+
+
+
 
 
 ## 现代C++特性
@@ -378,6 +401,25 @@ Google的gflags开源库有类似的功能
 ### std::error_code
 
 由两部分组成，errorCode枚举类，以及一个继承自std::error_category的类,此类包含了错误说明
+
+### regex库
+
+```c++
+std::string str {"CTX:LEVEL"}
+std::regex pattern {"\\w+:(\\w)"};    	// 创建一个正则表达式匹配规则
+std::smatch ret;                     	// 保存匹配结果
+
+// regex_search仅判断是否部分匹配
+if (std::regex_search(str, ret, pattern)) {   // 匹配成功返回true
+    std::cout << "正则表达式匹配的字符串：" << ret[0] << " ()中匹配到的字符串：" << ret[1] << std::endl;
+}
+
+// regex_march对整条字符串进行 匹配，不符合则返回false
+```
+
+
+
+
 
 ### std::chrono库
 
@@ -400,9 +442,9 @@ Google的gflags开源库有类似的功能
 system_clock的计时单位是$10^{-7}$秒
 
 ```c++
-	std::chrono::system_clock::time_point begin = std::chrono::system_clock::now();    
+	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();    // 测性能时使用steady_clock，结果更精确，system_clock无法精确到纳秒
     	your code here....
-    std::chrono::system_clock::time_point end = std::chrono::system_clock::now();
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     if(std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() < 1000){
         // 一秒准时退出
         break;
@@ -411,6 +453,18 @@ system_clock的计时单位是$10^{-7}$秒
 ```
 
 nanoseconds：纳秒。microseconds：微秒。
+
+直接判断两个time_point之间的间隔时间
+
+```c++
+std::chrono::steady_clock::time_point begin {std::chrono::steady_clock::now()};
+std::chrono::steady_clock::time_point end {std::chrono::steady_clock::now()};
+if ((end - begin) > std::chrono::miliseconds(30)) {
+    // end和begin相差时间大于30ms
+}
+```
+
+
 
 ### Atomic
 
@@ -467,6 +521,28 @@ enum memory_order {
    release和acquire总是结对使用，它保证了release 操作之前的所有内存操作不允许被乱序到 release 之后。acquire 操作之后的所有内存操作不允许被乱序到 acquire 之前。
 
 3. sequential consistency
+
+<font size=5>经典案例</font>
+
+```c++
+bool flag = false;
+char * p = nullptr;
+
+void Writer() {
+    p = xxxx;
+    flag = true;
+}
+
+void Reader() {
+    if (flag) {
+        std::string str = *p;
+    }
+}
+
+// 这个例子中Writer和Reader并发场景，cpu在执行Writer函数时，可能由于编译器优化或CPU乱序执行，导致 p 的赋值和flag的赋值不一定是按预定的顺序执行，因为在cpu看来，两个变量谁先赋值在Writer函数中是没有影响的，就可能导致Reader读取flag时出问题，这种场景就可以使用atomic来修饰flag，因为atomic默认带了内存序原语，因此可以保证不会发生这种问题。
+```
+
+
 
 ### Bitset
 

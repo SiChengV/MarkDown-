@@ -37,3 +37,7 @@ https://wizardforcel.gitbooks.io/100-gdb-tips/content/print-source-lines.html   
 
 
 https://juejin.cn/post/7469390430532403226   本地部署deepseek大模型教程
+
+
+
+**Kenneth-Lee-2012**   gitee  海思首席架构师的知识
