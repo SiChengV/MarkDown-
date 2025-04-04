@@ -417,6 +417,8 @@ linux一般默认使用POSIX正则表达式引擎，分为基本正则表达式�
 
 ### CMake
 
+动态库的依赖关系在运行时解析，编译链接时不会解析间接依赖关系，即A直接依赖B，B直接依赖C，编译时A是不会链接到C的。链接器在处理 A 时不会递归检查B的依赖。
+
 cmake中的系统指令支持大小、小写和大小写混合
 
 ```cmake
@@ -473,6 +475,7 @@ link_directories(路径)
 
 # 对add_library或add_executable生成的文件进行链接操作
 # 注意，库文件名称通常为libxxx.so，在这里只要写xxx即可
+# PUBLIC和INTERFACE依赖会将依赖继续传递给上层，其中INTERFACE代表自身编译时不去链接这个依赖。
 target_link_libraries(编译工程名 链接的库文件名称)
 
 # 搜索当前路径下的所有源代码文件并将列表存储到 xxx变量中
