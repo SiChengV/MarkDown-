@@ -41,3 +41,7 @@ https://juejin.cn/post/7469390430532403226   本地部署deepseek大模型教程
 
 
 **Kenneth-Lee-2012**   gitee  海思首席架构师的知识
+
+
+
+https://luyuhuang.tech/2022/10/30/lock-free-queue.html  无锁队列+内存顺序

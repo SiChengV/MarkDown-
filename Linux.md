@@ -520,7 +520,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 ${CMAKE_CURRENT_LIST_DIR}  # 可获得该cmake文件的当前绝对路径
 ```
 
-## Perf性能分析工具
+### Perf性能分析工具
 
 ### perf
 
@@ -596,6 +596,10 @@ Perf工作模式分为Counting Mode和Sampling Mode，Counting Mode将会精确�
 <font size="5">**perf list**</font>
 
 查看当前支持的所有事件包含硬件事件，软件事件，硬件cache事件，PMU事件以及预设Tracepoint事件
+
+### Valgrind内存检测工具
+
+如果要检测一个会创建子进程的程序，需要加--trace-children=yes来将子进程纳入监控
 
 ### apt包管理
 
