@@ -8,15 +8,6 @@
 
 
 
-<font size="5">**编译流程：**</font>
-
-```shell
-mkdir build  # 为了将编译过程中生成的文件放到build路径下，不破坏源码的目录结构  
-cd build
-cmake ..  # 前三步可以简化成 cmake -B build
-make
-```
-
 <font size="5">**list命令**</font>
 
 对一个list进行多种操作
@@ -520,8 +511,19 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 ${CMAKE_CURRENT_LIST_DIR}  # 可获得该cmake文件的当前绝对路径
 ```
 
-### Perf性能分析工具
 
+<font size="5">**编译流程：**</font>
+
+```shell
+mkdir build  # 为了将编译过程中生成的文件放到build路径下，不破坏源码的目录结构  
+cd build
+cmake ..  # 前三步可以简化成 cmake -B build
+make
+```
+
+
+
+## Perf性能分析工具
 ### perf
 
 Perf工作模式分为Counting Mode和Sampling Mode，Counting Mode将会精确统计一段时间内CPU相关硬件计数器数值的变化，为了统计用户感兴趣的事件，Perf Tool将设置性能控制相关的寄存器，这些寄存器的值将在监控周期结束后被读出，典型工具Perf Stat；Sampling Mode将以定期采样方式获取性能数据，PMU计数器将为某些特定事件配置溢出周期，当计数器溢出时，相关数据如 IP、通用寄存器、EFLAG 将会被捕捉到，典型工具Perf Record。
@@ -582,7 +584,7 @@ Perf工作模式分为Counting Mode和Sampling Mode，Counting Mode将会精确�
 
   ```shell
   perf record -p $pid
-  perf record -p $pid -g  #详细采用，配合perf report -g使用   不加-g貌似只能以线程为粒度采集
+  perf record -p $pid -g  #这个参数启用了函数级别的调用图记录。这意味着perf会记录每个函数调用的堆栈信息，这对于分析函数调用关系非常有用
   perf record -e cpu-clock ./$excutbleFile
   
   perf report $file   #查看统计信息
