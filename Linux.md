@@ -530,7 +530,7 @@ Perf工作模式分为Counting Mode和Sampling Mode，Counting Mode将会精确�
 
 <font size=5>**perf stat**</font>
 
-可以整体看看程序运行是各种统计时间的大概情况。**Perf stat通过概括精简的方式提供被调试程序运行的整体情况和汇总数据**。
+可以整体看看程序运行时各种统计时间的大概情况。**Perf stat通过概括精简的方式提供被调试程序运行的整体情况和汇总数据**。
 
 * 使用方法
 

@@ -45,3 +45,7 @@ https://juejin.cn/post/7469390430532403226   本地部署deepseek大模型教程
 
 
 https://luyuhuang.tech/2022/10/30/lock-free-queue.html  无锁队列+内存顺序
+
+
+
+https://mp.weixin.qq.com/s/9ATTDJXyznS5rDq3MWn7gw  c++推荐书籍
