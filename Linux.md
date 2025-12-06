@@ -56,6 +56,8 @@ file(GLOB_RECURSE <variable>
 
 查询进程亲核性：  `taskset -p {pid}`
 
+查看进程的所有线程亲核性：taskset -acp {pid}
+
 **相关接口**
 
 * pthread_setaffinity_np
@@ -89,7 +91,7 @@ file(GLOB_RECURSE <variable>
 **调度策略查看方法：**
 
 * ps -eo pid,comm,policy,rtprio,ni  查看进程调度策略、实时优先级、NICE值
-* 通过 chrt -p {pid}  回显显示进程调度策略以及优先级
+* 通过 chrt -p {pid}  回显显示进程的实时调度策略以及优先级（无法查看NICE值）
 
 * 通过/proc/{pid}/sched 中的policy查看进程调度策略
 
@@ -274,6 +276,8 @@ cgroups通过VFS把相关功能暴露给用户
   
   h、j、k、l：右、下、左、上。H：屏幕第一个字符，L：屏幕最后一行的第一个字符
   w、b、e：跳到下个单词词首、跳到本单词或上个单词词首、跳到本单词或下个单词词尾
+  J：将下一行合并到当前行
+  ge：跳到上个单词末尾
   gg：跳到第一行，G：跳到最后一行，5G：跳到第五行
   v：进入行可视模式，类似于鼠标选取
   ctrl + v：进入列选择模式
@@ -561,6 +565,10 @@ cmake中的系统指令支持大小、小写和大小写混合
 
 ```cmake
 cmake_minimum_required (VERSION 2.6)
+
+# 设定编译器 在project()前才能生效
+set(CMAKE_C_COMPILER clang)
+set(CMAKE_CXX_COMPILER clang++)
 
 # 本CMakeLists.txt的project名称
 # 会自动创建两个变量，PROJECT_SOURCE_DIR 和 PROJECT_NAME
@@ -1122,6 +1130,7 @@ sigaction(SIGINT, &sa, nullptr);  // 注册信号函数
       #   0	命令成功结束
       #   1	一般性未知错误
       #   2	不适合的shell指令
+  $#  # 表示脚本或函数接收到的参数个数
       
   # 定义变量 变量加减
   num=1
@@ -1305,6 +1314,8 @@ export LD_LIBRARY_PATH=自己的动态链接库路径:$LD_LIBRARY_PATH
   跟文件绑定而不是更用户绑定
 
 以passwd程序为例：通过ll查看passwd二进制的权限可以看到有s位，此位即说明SUID位，passwd修改的是/etc/shadow文件，而此文件的属性为 644 root:root，说明非root用户是无法写此文件的，运行有SUID位的进程会让此进程的属主变成其二进制的属主，相当于提权操作。
+
+查看系统所有用户信息：/etc/passwd
 
 #### 秘钥生成
 
