@@ -85,3 +85,4 @@ void generateNext(string &s, int next[]){
         return ans;
     }
 ```
+

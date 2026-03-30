@@ -1,6 +1,3 @@
-[TOC]
-
-# Linux
 
 ## Linux知识
 
