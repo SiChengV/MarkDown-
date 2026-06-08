@@ -128,7 +128,7 @@ SP：堆栈指针寄存器，内容为当前栈帧的栈顶地址，常与BP搭�
 
 **RSS (Resident Set Size)**：驻留内存大小，是进程当前实际占用的物理内存大小，包括进程独自占用的物理内存、与其他进程共享的内存。可使用`ps -aux` 查看，RSS列即RSS，或`top`的RES列。
 
-**PSS(Proportional Set Size)：**比例驻留内存大小，包括检查独自占用的内存、比例分配合其他进程共享的内存（共享库内存会均分到各个共享进程）。可通过`/proc/{PID}/smaps_rollup`文件查看
+**PSS(Proportional Set Size)：** 比例驻留内存大小，包括检查独自占用的内存、比例分配合其他进程共享的内存（共享库内存会均分到各个共享进程）。可通过`/proc/{PID}/smaps_rollup`文件查看
 
 Pss_File是进程的动态库中使用mmap之类的函数分配的内存
 
@@ -136,28 +136,52 @@ Pss_File是进程的动态库中使用mmap之类的函数分配的内存
 
 **PSSAnon和RSSAnon**：匿名内存，两者通常情况下相差不大，比如不包括动态库内mmap出来的内存
 
-### PROC系统目录
+#### 二进制内存布局
+* 数据段 .data
+  数据段用来存放程序中**已经明确初始化**（即赋了初值），且初值**不为 0** 的全局变量和静态变量。
+* BSS段 .bss
+  BSS 段用来存放程序中**未初始化**，或者**显式初始化为 0** 的全局变量和静态变量。仅在 `.so` 里记录一个大小数字。被加载时才申请对应大小内存。
+
+### PROC系统目录内容
 
 /proc目录保存当前进程信息
 
-/proc/xxx/maps 文件保存进程当前使用内存地址布局
+#### /proc/pid/maps 
+文件保存进程当前使用内存地址布局
 
-/proc/xxx/smaps   查看内存资源使用情况
+#### /proc/pid/smaps   
+查看内存资源使用情况
+  ``` shell
+e7fbd7eb3000-e7fbd7eb6000 r--p 00053000 08:47 16600                   /usr/lib64/liblaf.so.1.0.0               # 标记地址所属空间，如果为空则为匿名内存
+Size:                 12 kB
+KernelPageSize:        4 kB
+MMUPageSize:           4 kB
+Rss:                  12 kB
+Pss:                  12 kB
+Pss_Dirty:            12 kB
+Shared_Clean:          0 kB
+Shared_Dirty:          0 kB
+Private_Clean:         0 kB
+Private_Dirty:        12 kB
+Referenced:           12 kB
+Anonymous:            12 kB          # 一般在加载二进制的.bss和.data段申请    
+KSM:                   0 kB
+LazyFree:              0 kB
+AnonHugePages:         0 kB
+ShmemPmdMapped:        0 kB
+FilePmdMapped:         0 kB
+Shared_Hugetlb:        0 kB
+Private_Hugetlb:       0 kB
+Swap:                  0 kB
+SwapPss:               0 kB
+Locked:                0 kB
+THPeligible:           0
+VmFlags: rd mr mw me ac
+  ```
 
-/proc/cpuinfo 查看系统CPU信息
 
-```shell
-physical id : 0
-core id     : 0
-core id     : 1
-processor   : 0
-processor   : 1
-processor   : 2
-processor   : 3
-// 说明：1 颗物理 CPU，有 2 个物理核心，开了超线程 → 4 个逻辑核心。
-```
 
-#### IO
+#### /proc/pid/IO
 
 | 字段                    | 含义                       |
 | --------------------- | ------------------------ |
@@ -169,12 +193,28 @@ processor   : 3
 | write_bytes           | 实际写入磁盘的字节数               |
 | cancelled_write_bytes | 被 page cache 吃掉没写入磁盘的字节数 |
 
-#### stat
+#### /proc/pid/stat
 
 `awk '{print "minor page fault: "$10"\nmajor page fault: "$12}' /proc/<pid>/stat`   查看缺页情况
 
 `minor page faults`：页不在页表中，但在内存（如共享页、文件映射等）
  `major page faults`：页不在内存，需要从磁盘加载（代价大）
+
+#### /proc/cpuinfo 
+查看系统CPU信息
+  ```shell
+    physical id : 0
+	core id     : 0
+	core id     : 1
+	processor   : 0
+	processor   : 1
+	processor   : 2
+	processor   : 3
+	// 说明：1 颗物理 CPU，有 2 个物理核心，开了超线程 → 4 个逻辑核心。
+  ```
+
+#### /proc/net/dev
+显示系统中所有网络接口的统计信息
 
 ### CGROUPS机制
 
@@ -707,7 +747,7 @@ struct sockaddr_in {
 // sockaddr_un结构用于Unix域套接字，即本机内通信
 struct sockaddr_un {
     sa_family_t sun_family;  // 地址族，必须是 AF_UNIX
-    char        sun_path[108];  // 文件路径，如果以'\0'开头,则使用抽象命名空间，即不会在文件系统中城建实际文件
+	char        sun_path[108];  // 文件路径，如果以'\0'开头,则使用抽象命名空间，即不会在文件系统中城建实际文件。注意使用抽象命名空间时，在传入文件大小时不能使用sizeof(sockaddr_un)，需手动计算实际大小
 };
 ```
 
@@ -1034,8 +1074,11 @@ sigaction(SIGINT, &sa, nullptr);  // 注册信号函数
   参考资料：https://www.lanqiao.cn/questions/985/
 
 * `rpm2cpio xxx.rpm | cpio -div` 将rpm包解压解压到当前目录
+* `arp -a`    显示当前电脑中保存的 ARP 缓存表。它能让你看到当前局域网内有哪些设备最近和你的电脑沟通过，并列出它们的 IP 地址与 MAC 地址（物理地址）的对应关系    #网卡
 
 * `rpm -ivh xxx` 安装rpm包
+* date 
+	`date -u -d @1776409756`    将unix时间戳转换为UTC时区时间
 
 * `pgrep -f {name}`   根据进程名获取pid
 
