@@ -2,6 +2,7 @@
 
 全局配置目录：`~/.config/opencode/`
 
+
 ### opencode配置文件
 
 全局配置文件目录：~/.config/opencode/opencode.json
