@@ -17,6 +17,37 @@
 * https://learn.microsoft.com/zh-cn/cpp/cpp/cpp-language-reference?view=msvc-170
   微软提供的c++语言参考
 
+#### 共享内存
+
+linux c++共享存储有两种：POSIX和SYSTEM V 
+
+##### POSIX
+示例
+```c++
+// 1. 打开共享内存对象（O_RDWR读写，O_CREAT不存在则创建）
+// 注意：名称必须以 '/' 开头，且长度不超过 NAME_MAX
+int fd = shm_open("/my_shared_mem", O_RDWR | O_CREAT, 0644);
+// 2. 设置共享内存大小（新建时必须执行，已存在但需扩容时也可执行）
+size_t size = 4096; // 4KB
+if (ftruncate(fd, size) == -1) {
+	perror("ftruncate");
+	exit(EXIT_FAILURE);
+}
+// 3. 映射到进程虚拟内存（MAP_SHARED 表示写入会同步回物理内存，供其他进程读取）
+void *addr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+if (addr == MAP_FAILED) {
+	perror("mmap");
+	exit(EXIT_FAILURE);
+}
+close(fd); // 映射完成后可以立即关闭fd，不影响映射
+// 4. 读写共享内存（例如写入字符串）
+strcpy((char *)addr, "Hello from POSIX SHM!");
+// 5. 解除映射
+if (munmap(addr, size) == -1) {
+	perror("munmap");
+}
+```
+
 #### 条件变量
 
 ```c++

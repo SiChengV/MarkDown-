@@ -901,6 +901,10 @@ echo -:auto >> kprobe_events               # 删除探测点
 
 * fflush 把用户区的数据刷到内核区
 
+### poll
+* **poll + fifo场景**
+	fifo读端先打开，写端后打开的情况（一写零读场景），读端fd会阻塞在poll函数等待写端。
+	但是如果读写端都已经打开，然后写端关闭的场景，poll会立即返回POLLHUP
 ### epoll
 
 新的I/O多路复用机制，使用回调机制代替SELECT的轮询机制，epoll的数据结构在内核态，是一个文件对象（包含了一个监听集合和就绪队列，其中监听集合用红黑树实现，目的是为了更好更快的管理文件描述符）
@@ -1067,6 +1071,8 @@ sigaction(SIGINT, &sa, nullptr);  // 注册信号函数
 * aureport 查询系统审计日志
   
   例如查看selinux告警时可以使用`aureport -a` 查看
+* stress-ng 加压工具
+	 stress-ng --cpu 0 --cpu-load 80    占用所有cpu，每个cpu占用80%。可通过前面加sudo nice -n -20来提高加压工具的cpu占用优先级
 
 * `unrar x 文件名`：解压rar压缩的文件
   x为全路径解压，在指定解压路径时会把压缩前的路径一起解压出来
@@ -1099,6 +1105,8 @@ sigaction(SIGINT, &sa, nullptr);  // 注册信号函数
 * mv命令
   
   mv在同一个分区之内是执行的rename的操作，不会更改inode节点的信息，rename是原子操作，可以看成一瞬间就能完成。而如果跨分区进行mv 的话，就需要对文件进行复制+修改文件属性，涉及的时间就会比同分区mv大大加长，实际的inode也会发生改变。
+* nohup
+	nohup和&搭配可以实现运行程序后与当前终端解绑，即ssh退出后后台运行的进程不退出
 
 * ps
   
@@ -1307,6 +1315,10 @@ sigaction(SIGINT, &sa, nullptr);  // 注册信号函数
   
   * vm.dirty_expire_centisecs  代表已存在多久的系统脏页会刷回磁盘 单位 10ms
   * vm.dirty_writeback_centisecs  表示系统周期刷写磁盘的时间  单位 10ms
+#### 网络相关
+##### ethtool
+* ethtool -T {网卡名}  
+	检查网卡的软/硬件时间戳数据
 
 #### 查看二进制文件
 
