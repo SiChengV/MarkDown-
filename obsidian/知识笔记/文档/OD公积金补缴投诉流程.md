@@ -12,7 +12,7 @@ to be continue
 
 话务员说需要知道公司的工商注册地址
 
-  ![[Pasted image 20260725103211.png]]
+  ![[Pastedimage20260725103211.jpg|Pastedimage20260725103211.png]]
 
 
 
@@ -22,7 +22,7 @@ to be continue
 
 杭州公积金中心（耀江广厦 A 座 3 楼）
 
-![[Pasted image 20260725103234.png]]
+![[Pastedimage20260725103234.jpg|Pastedimage20260725103234.png]]
 
   
 
@@ -32,7 +32,7 @@ to be continue
 
 下午 14点-17点半
 
-  ![[Pasted image 20260725103245.png]]
+  ![[Pastedimage20260725103245.jpg|Pastedimage20260725103245.png]]
 
 
 
@@ -40,7 +40,7 @@ to be continue
 
   
 
-![[Pasted image 20260725103253.png]]
+![[Pastedimage20260725103253.jpg|Pastedimage20260725103253.png]]
 
   
 
@@ -66,7 +66,7 @@ to be continue
 
 保密协议后面的不要，他们只要前面的劳动合同，估计也就8~9页
 
-![[Pasted image 20260725103311.png]]
+![[Pastedimage20260725103311.jpg|Pastedimage20260725103311.png]]
 
   
 
